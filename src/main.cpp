@@ -2,7 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <bits/stdc++.h>
 #include "window.hpp"
-#include "vector2.hpp"
+#include "math/vector2.hpp"
 using namespace std;
 
 int main() {

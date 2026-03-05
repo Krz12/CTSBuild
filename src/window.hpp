@@ -4,13 +4,14 @@
 #include <GLFW/glfw3.h>
 #include "math/vector2.hpp"
 #include <stdexcept>
+#include <chrono>
 using namespace std;
 
 class window {
     private:
     GLFWwindow* __api_window;
     bool __v_sync = 0;
-    std::chrono::time_point<std::chrono::high_resolution_clock> lastTime = chrono::high_resolution_clock::now();
+    chrono::time_point<chrono::high_resolution_clock> lastTime = chrono::high_resolution_clock::now();
 
     public:
     window(vector2<int> size, string const& title) {

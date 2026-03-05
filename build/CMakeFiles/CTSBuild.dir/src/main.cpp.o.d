@@ -344,4 +344,4 @@ CMakeFiles/CTSBuild.dir/src/main.cpp.o: \
  /usr/include/c++/13/bits/fs_path.h /usr/include/c++/13/bits/fs_dir.h \
  /usr/include/c++/13/bits/fs_ops.h /usr/include/c++/13/memory_resource \
  /media/j/DATA/proj/skies/CTSBuild/src/window.hpp \
- /media/j/DATA/proj/skies/CTSBuild/src/vector2.hpp
+ /media/j/DATA/proj/skies/CTSBuild/src/math/vector2.hpp
