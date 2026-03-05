@@ -3,6 +3,7 @@ CTSBuild: \
   /usr/lib/gcc/x86_64-redhat-linux/15/../../../../lib64/crti.o \
   /usr/lib/gcc/x86_64-redhat-linux/15/crtbegin.o \
   CMakeFiles/CTSBuild.dir/src/main.cpp.o \
+  CMakeFiles/CTSBuild.dir/src/runtime_data.cpp.o \
   CMakeFiles/CTSBuild.dir/external/stb/stb_image.cpp.o \
   libglad.a \
   /usr/lib64/libGL.so \
@@ -66,6 +67,8 @@ CTSBuild: \
 /usr/lib/gcc/x86_64-redhat-linux/15/crtbegin.o:
 
 CMakeFiles/CTSBuild.dir/src/main.cpp.o:
+
+CMakeFiles/CTSBuild.dir/src/runtime_data.cpp.o:
 
 CMakeFiles/CTSBuild.dir/external/stb/stb_image.cpp.o:
 

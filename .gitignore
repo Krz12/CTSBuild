@@ -1,4 +1,2 @@
 .clangd
 build/*
-!build/full_build.sh
-!build/game.sh

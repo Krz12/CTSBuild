@@ -1,5 +1,4 @@
 #pragma once
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "math/vector2.hpp"
@@ -102,6 +101,8 @@ class window {
         if (!is_open()) return;
         if (is_minimized()) return;
         glfwPollEvents();
+        glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 };
 
