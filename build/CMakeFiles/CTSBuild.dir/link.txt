@@ -1,0 +1,1 @@
+/usr/lib64/ccache/c++ -g -Wl,--dependency-file=CMakeFiles/CTSBuild.dir/link.d CMakeFiles/CTSBuild.dir/src/main.cpp.o CMakeFiles/CTSBuild.dir/external/stb/stb_image.cpp.o -o CTSBuild  libglad.a /usr/lib64/libGL.so -lglfw /usr/lib64/libfreetype.so /usr/lib64/libassimp.so.5.3.1 -lGLU -lm -lpthread -ldl -lpugixml -lpoly2tri -lrt
