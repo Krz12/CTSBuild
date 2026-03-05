@@ -1,6 +1,6 @@
 #pragma once
 
-#include <bits/stdc++.h>
+#include <cmath>
 using namespace std;
 
 template <typename T>
@@ -27,11 +27,6 @@ class vector2 {
         return x * x + y * y;
     }
 
-    private:
-    void compute_magnitude() {
-        __magnitude = sqrt(magnitude_squared());
-    }
-
     public:
     T x, y;
 
@@ -41,15 +36,8 @@ class vector2 {
 
     double magnitude() {
         check_cache();
-        if (__magnitude == -INFINITY) compute_magnitude();
+        if (__magnitude == -INFINITY) 
+            __magnitude = sqrt(magnitude_squared());
         return __magnitude;
-    }
-
-    double ratio_xy() {
-        return (double)x / (double)y;
-    }
-
-    double ratio_yx() {
-        return (double)y / (double)x;
     }
 };

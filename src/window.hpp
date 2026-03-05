@@ -2,7 +2,7 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "vector2.hpp"
+#include "math/vector2.hpp"
 #include <stdexcept>
 using namespace std;
 
