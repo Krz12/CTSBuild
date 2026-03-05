@@ -1,4 +1,0 @@
-/home/bob/Dokumenty/Informatyka/Projekty/CTSBuild/build/CMakeFiles/glad.dir
-/home/bob/Dokumenty/Informatyka/Projekty/CTSBuild/build/CMakeFiles/CTSBuild.dir
-/home/bob/Dokumenty/Informatyka/Projekty/CTSBuild/build/CMakeFiles/edit_cache.dir
-/home/bob/Dokumenty/Informatyka/Projekty/CTSBuild/build/CMakeFiles/rebuild_cache.dir
