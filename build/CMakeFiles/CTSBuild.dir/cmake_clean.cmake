@@ -1,5 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/CTSBuild.dir/link.d"
   "CMakeFiles/CTSBuild.dir/external/stb/stb_image.cpp.o"
   "CMakeFiles/CTSBuild.dir/external/stb/stb_image.cpp.o.d"
   "CMakeFiles/CTSBuild.dir/src/main.cpp.o"

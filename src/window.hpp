@@ -47,7 +47,7 @@ class window {
     }
 
     void fullscreen(bool b) {
-        if (!__api_window) throw ("API Window does not exist");
+        if (!__api_window) throw runtime_error("API Window does not exist");
         
         GLFWmonitor* monitor = glfwGetPrimaryMonitor();
         const GLFWvidmode* mode = glfwGetVideoMode(monitor);
@@ -69,9 +69,8 @@ class window {
         return glfwGetWindowAttrib(__api_window, GLFW_ICONIFIED);
     }
 
-    void vsync(bool enabled)
-    {
-        __v_sync = enabled;
+    void vsync(bool b) {
+        __v_sync = b;
         glfwSwapInterval(__v_sync);
     }
 
