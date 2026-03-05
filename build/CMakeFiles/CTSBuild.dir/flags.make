@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/home/bob/Dokumenty/Informatyka/Projekty/CTSBuild/src -I/usr/include/freetype2 -I/home/bob/Dokumenty/Informatyka/Projekty/CTSBuild/external/glad/include
 
-CXX_FLAGS = -g -std=gnu++17
+CXX_FLAGS = -O3 -DNDEBUG -std=gnu++17
 

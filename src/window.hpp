@@ -10,6 +10,7 @@ class window {
     private:
     GLFWwindow* __api_window;
     bool __v_sync = 0;
+    std::chrono::time_point<std::chrono::high_resolution_clock> lastTime = chrono::high_resolution_clock::now();
 
     public:
     window(vector2<int> size, string const& title) {
@@ -101,7 +102,6 @@ class window {
     void update() {
         if (!is_open()) return;
         if (is_minimized()) return;
-
         glfwPollEvents();
     }
 };

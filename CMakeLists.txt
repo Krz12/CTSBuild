@@ -1,15 +1,25 @@
 cmake_minimum_required(VERSION 3.10)
 project(CTSBuild)
 
-set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(DEBUG, true)
+
+if (DEBUG)
+    set(CMAKE_BUILD_TYPE Debug)
+    set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DDEBUG -Wall")
+else()
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
 
 # Ścieżki do nagłówków
 include_directories(
     ${CMAKE_SOURCE_DIR}/src
     /usr/include/freetype2
 )
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Zbierz wszystkie pliki źródłowe
 file(GLOB_RECURSE SOURCES "src/*.cpp")

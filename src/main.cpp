@@ -6,10 +6,10 @@
 using namespace std;
 
 int main() {
-    window w(window::DEFAULT_SIZE, "TUFF");
+    window main_window(window::DEFAULT_SIZE, "CTSBuild");
 
-    while (w.is_open()) {
-        w.update();
+    while (main_window.is_open()) {
+        main_window.update();
     }
 
     return 0;

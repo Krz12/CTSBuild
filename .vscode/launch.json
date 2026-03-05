@@ -2,10 +2,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug CBuild",
+            "name": "Debug CTSBuild",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/CBuild",
+            "program": "${workspaceFolder}/build/CTSBuild",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

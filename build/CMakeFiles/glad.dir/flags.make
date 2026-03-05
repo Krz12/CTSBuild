@@ -6,5 +6,5 @@ C_DEFINES =
 
 C_INCLUDES = -I/home/bob/Dokumenty/Informatyka/Projekty/CTSBuild/src -I/usr/include/freetype2 -I/home/bob/Dokumenty/Informatyka/Projekty/CTSBuild/external/glad/include
 
-C_FLAGS = -g
+C_FLAGS = -O3 -DNDEBUG
 
