@@ -1,5 +1,5 @@
 CMakeFiles/glad.dir/external/glad/src/glad.c.o: \
- /home/krz/Dokumenty/Informatyka/Projekty/CTSBuild/noweCTSBuild/CTSBuild/external/glad/src/glad.c \
+ /home/bob/Dokumenty/Informatyka/Projekty/CTSBuild/external/glad/src/glad.c \
  /usr/include/stdc-predef.h /usr/include/stdio.h \
  /usr/include/bits/libc-header-start.h /usr/include/features.h \
  /usr/include/features-time64.h /usr/include/bits/wordsize.h \
@@ -34,7 +34,7 @@ CMakeFiles/glad.dir/external/glad/src/glad.c.o: \
  /usr/include/bits/stdlib-float.h /usr/include/string.h \
  /usr/include/bits/types/locale_t.h /usr/include/bits/types/__locale_t.h \
  /usr/include/strings.h \
- /home/krz/Dokumenty/Informatyka/Projekty/CTSBuild/noweCTSBuild/CTSBuild/external/glad/include/glad/glad.h \
+ /home/bob/Dokumenty/Informatyka/Projekty/CTSBuild/external/glad/include/glad/glad.h \
  /usr/include/KHR/khrplatform.h \
  /usr/lib/gcc/x86_64-redhat-linux/15/include/stdint.h \
  /usr/include/stdint.h /usr/include/bits/wchar.h \

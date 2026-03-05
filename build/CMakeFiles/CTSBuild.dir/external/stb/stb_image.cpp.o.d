@@ -1,7 +1,7 @@
 CMakeFiles/CTSBuild.dir/external/stb/stb_image.cpp.o: \
- /home/krz/Dokumenty/Informatyka/Projekty/CTSBuild/noweCTSBuild/CTSBuild/external/stb/stb_image.cpp \
+ /home/bob/Dokumenty/Informatyka/Projekty/CTSBuild/external/stb/stb_image.cpp \
  /usr/include/stdc-predef.h \
- /home/krz/Dokumenty/Informatyka/Projekty/CTSBuild/noweCTSBuild/CTSBuild/external/stb/stb_image.h \
+ /home/bob/Dokumenty/Informatyka/Projekty/CTSBuild/external/stb/stb_image.h \
  /usr/include/stdio.h /usr/include/bits/libc-header-start.h \
  /usr/include/features.h /usr/include/features-time64.h \
  /usr/include/bits/wordsize.h /usr/include/bits/timesize.h \

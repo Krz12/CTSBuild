@@ -3,18 +3,40 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "vector2.hpp"
+#include <stdexcept>
 using namespace std;
 
 class window {
     private:
     GLFWwindow* __api_window;
+    bool __v_sync = 0;
 
     public:
     window(vector2<int> size, string const& title) {
-        __api_window = glfwCreateWindow(size.x, size.y, title.c_str(), nullptr, nullptr);
         if (!glfwInit()) {
-        //std::cerr << "Failed to initialize GLFW" << std::endl;
+            throw runtime_error("Failed to initialize GLFW");
         }
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // lub 4, jeśli używasz OpenGL 4.x
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        __api_window = glfwCreateWindow(size.x, size.y, title.c_str(), nullptr, nullptr);
+        if (!__api_window) {
+            glfwTerminate();
+            throw runtime_error("Failed to create GLFW window");
+        }
+        glfwMakeContextCurrent(__api_window);
+        if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+            glfwDestroyWindow(__api_window);
+            glfwTerminate();
+            throw runtime_error("Failed to initialize GLAD");
+        }
+    }
+
+    ~window() {
+        if (__api_window) {
+            glfwDestroyWindow(__api_window);
+        }
+        glfwTerminate();
     }
 
     const static vector2<int> DEFAULT_SIZE;
@@ -46,6 +68,16 @@ class window {
         return glfwGetWindowAttrib(__api_window, GLFW_ICONIFIED);
     }
 
+    void vsync(bool enabled)
+    {
+        __v_sync = enabled;
+        glfwSwapInterval(__v_sync);
+    }
+
+    bool vsync() const {
+        return __v_sync;
+    }
+
     vector2<int> size() const {
         int w, h;
         glfwGetWindowSize(__api_window, &w, &h);
@@ -70,7 +102,7 @@ class window {
         if (!is_open()) return;
         if (is_minimized()) return;
 
-        
+        glfwPollEvents();
     }
 };
 

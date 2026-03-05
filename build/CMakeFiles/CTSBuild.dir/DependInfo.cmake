@@ -8,8 +8,8 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/krz/Dokumenty/Informatyka/Projekty/CTSBuild/noweCTSBuild/CTSBuild/external/stb/stb_image.cpp" "CMakeFiles/CTSBuild.dir/external/stb/stb_image.cpp.o" "gcc" "CMakeFiles/CTSBuild.dir/external/stb/stb_image.cpp.o.d"
-  "/home/krz/Dokumenty/Informatyka/Projekty/CTSBuild/noweCTSBuild/CTSBuild/src/main.cpp" "CMakeFiles/CTSBuild.dir/src/main.cpp.o" "gcc" "CMakeFiles/CTSBuild.dir/src/main.cpp.o.d"
+  "/home/bob/Dokumenty/Informatyka/Projekty/CTSBuild/external/stb/stb_image.cpp" "CMakeFiles/CTSBuild.dir/external/stb/stb_image.cpp.o" "gcc" "CMakeFiles/CTSBuild.dir/external/stb/stb_image.cpp.o.d"
+  "/home/bob/Dokumenty/Informatyka/Projekty/CTSBuild/src/main.cpp" "CMakeFiles/CTSBuild.dir/src/main.cpp.o" "gcc" "CMakeFiles/CTSBuild.dir/src/main.cpp.o.d"
   "" "CTSBuild" "gcc" "CMakeFiles/CTSBuild.dir/link.d"
   )
 

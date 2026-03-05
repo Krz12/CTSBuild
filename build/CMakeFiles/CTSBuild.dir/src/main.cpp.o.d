@@ -1,7 +1,7 @@
 CMakeFiles/CTSBuild.dir/src/main.cpp.o: \
- /home/krz/Dokumenty/Informatyka/Projekty/CTSBuild/noweCTSBuild/CTSBuild/src/main.cpp \
+ /home/bob/Dokumenty/Informatyka/Projekty/CTSBuild/src/main.cpp \
  /usr/include/stdc-predef.h \
- /home/krz/Dokumenty/Informatyka/Projekty/CTSBuild/noweCTSBuild/CTSBuild/external/glad/include/glad/glad.h \
+ /home/bob/Dokumenty/Informatyka/Projekty/CTSBuild/external/glad/include/glad/glad.h \
  /usr/include/KHR/khrplatform.h \
  /usr/lib/gcc/x86_64-redhat-linux/15/include/stdint.h \
  /usr/include/stdint.h /usr/include/bits/libc-header-start.h \
@@ -292,5 +292,5 @@ CMakeFiles/CTSBuild.dir/src/main.cpp.o: \
  /usr/include/c++/15/filesystem /usr/include/c++/15/bits/fs_fwd.h \
  /usr/include/c++/15/bits/fs_path.h /usr/include/c++/15/bits/fs_dir.h \
  /usr/include/c++/15/bits/fs_ops.h /usr/include/c++/15/memory_resource \
- /home/krz/Dokumenty/Informatyka/Projekty/CTSBuild/noweCTSBuild/CTSBuild/src/window.hpp \
- /home/krz/Dokumenty/Informatyka/Projekty/CTSBuild/noweCTSBuild/CTSBuild/src/vector2.hpp
+ /home/bob/Dokumenty/Informatyka/Projekty/CTSBuild/src/window.hpp \
+ /home/bob/Dokumenty/Informatyka/Projekty/CTSBuild/src/vector2.hpp
