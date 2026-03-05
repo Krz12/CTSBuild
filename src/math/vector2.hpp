@@ -23,15 +23,14 @@ class vector2 {
     }
 
     public:
-    double magnitude_squared() {
-        return x * x + y * y;
-    }
-
-    public:
     T x, y;
 
     vector2(T x, T y) : x(x), y(y) {
         
+    }
+
+    double magnitude_squared() {
+        return x * x + y * y;
     }
 
     double magnitude() {
