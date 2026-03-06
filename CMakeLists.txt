@@ -19,7 +19,7 @@ include_directories(
     /usr/include/freetype2
 )
 
-#set(OpenGL_GL_PREFERENCE "GLVND")
+set(OpenGL_GL_PREFERENCE "GLVND")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Zbierz wszystkie pliki źródłowe
