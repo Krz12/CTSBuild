@@ -5,6 +5,7 @@
 #include "runtime_data.hpp"
 #include <chrono>
 #include "graph.hpp"
+#include "tree.hpp"
 using namespace std;
 
 int main() {
