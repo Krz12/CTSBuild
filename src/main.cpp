@@ -9,6 +9,10 @@
 using namespace std;
 
 int main() {
+    tree t(graph(1), 0);
+    t.add_vertex(0);
+    t.remove_vertex(0);
+
     window main_window(window::DEFAULT_SIZE, "CTSBuild");
     main_window.vsync(false);
 
