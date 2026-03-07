@@ -9,7 +9,7 @@ using namespace std;
 class window {
     private:
     GLFWwindow* __api_window;
-    bool __v_sync = 0;
+    bool __vsync = 0;
     chrono::time_point<chrono::high_resolution_clock> lastTime = chrono::high_resolution_clock::now();
 
     public:
@@ -17,15 +17,19 @@ class window {
         if (!glfwInit()) {
             throw runtime_error("Failed to initialize GLFW");
         }
+        
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // lub 4, jeśli używasz OpenGL 4.x
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         __api_window = glfwCreateWindow(size.x, size.y, title.c_str(), nullptr, nullptr);
+        
         if (!__api_window) {
             glfwTerminate();
             throw runtime_error("Failed to create GLFW window");
         }
+        
         glfwMakeContextCurrent(__api_window);
+        
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
             glfwDestroyWindow(__api_window);
             glfwTerminate();
@@ -47,7 +51,7 @@ class window {
     }
 
     void fullscreen(bool b) {
-        if (!__api_window) throw runtime_error("API Window does not exist");
+        if (!__api_window) throw runtime_error("API window does not exist");
         
         GLFWmonitor* monitor = glfwGetPrimaryMonitor();
         const GLFWvidmode* mode = glfwGetVideoMode(monitor);
@@ -70,12 +74,12 @@ class window {
     }
 
     void vsync(bool b) {
-        __v_sync = b;
-        glfwSwapInterval(__v_sync);
+        __vsync = b;
+        glfwSwapInterval(__vsync);
     }
 
     bool vsync() const {
-        return __v_sync;
+        return __vsync;
     }
 
     vector2<int> size() const {
