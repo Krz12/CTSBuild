@@ -1,4 +1,4 @@
 mkdir -p build
 cmake -S . -B build
-make build
+cmake --build build --config Debug
 ./build/CTSBuild
