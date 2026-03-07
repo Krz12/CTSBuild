@@ -130,7 +130,7 @@ class abstract_graph {
     }
 
     //Returns the index of the vertex at the other side of an edge
-    virtual int other_vertex(edge const& e, int index) const {
+    static int other_vertex(edge const& e, int index) {
         if (e.u != index) return e.u;
         return e.v;
     }
@@ -175,6 +175,7 @@ class abstract_graph {
     -current_edge represents the last edge entered from the given vertex
     -newly visited nodes will always be in the ENTERING state
     -vertices/edges should not be removed during traversal
+    -pointers to previous edges are null for the vertex
 
     memory = O(size()) = O(vertex_count) + O(__free_vertices)
     time = O(size() + edge_count)
@@ -200,9 +201,12 @@ class abstract_graph {
             if (current_edge[index] == -1) {
                 state[index] = dfs_state::ENTERING;
 
+                shared_ptr<vertex> const& v_ptr = __vertices[index];
+                shared_ptr<edge> const& e_ptr = last == -1 ? nullptr : __edges[last];
+
                 //enter function
                 bool enter = std::forward<dfs_enter>(enter_function)
-                (index, last, state, current_edge);
+                (v_ptr, e_ptr, state, current_edge);
 
                 if (!enter) {
                     state[index] = dfs_state::LEFT;
@@ -218,9 +222,12 @@ class abstract_graph {
                 current_edge[index] = -1;
                 state[index] = dfs_state::LEAVING;
 
+                shared_ptr<vertex> const& v_ptr = __vertices[index];
+                shared_ptr<edge> const& e_ptr = last == -1 ? nullptr : __edges[last];
+
                 //leave function
                 std::forward<dfs_leave>(leave_function)
-                (index, last, state, current_edge);
+                (v_ptr, e_ptr, state, current_edge);
 
                 state[index] = dfs_state::LEFT;
                 continue;
@@ -239,6 +246,7 @@ class abstract_graph {
         -bfs_enter should return whether the bfs should visit the given vertex
         -newly visited nodes will always be in the VISITED state
         -vertices/edges should not be removed during traversal
+        -pointers to previous edges are null for the vertex
 
         memory = O(size()) = O(vertex_count) + O(__free_vertices)
         time = O(size() + edge_count)
@@ -261,8 +269,12 @@ class abstract_graph {
             int last = q.front().second;
             q.pop();
 
+            shared_ptr<vertex> const& v_ptr = __vertices[index];
+            shared_ptr<edge> const& e_ptr = last == -1 ? nullptr : __edges[last];
+
             //enter function
-            bool enter = forward<bfs_enter>(enter_function)(index, last, state);
+            bool enter = forward<bfs_enter>(enter_function)
+            (__vertices[index], __edges[last], state);
             if (!enter) continue;
 
             for (int i : get_vertex(index).edges()) {

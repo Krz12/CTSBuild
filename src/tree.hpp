@@ -6,22 +6,20 @@
 #include "graph.hpp"
 using namespace std;
 
-class tree : virtual public abstract_graph {
+class tree_vertex : virtual public vertex {
+    protected:
+    shared_ptr<int> __parent; //index of edge, not vertex
+
     public:
-    
-    class tree_vertex : virtual public vertex {
-        protected:
-        shared_ptr<int> __parent; //index of edge, not vertex
+    virtual int parent() const {
+        return *__parent;
+    }
 
-        public:
-        virtual int parent() {
-            return *__parent;
-        }
+    tree_vertex(int const& index, shared_ptr<vector<int>> __adj, shared_ptr<int> const& parent)
+        : vertex(index, __adj), __parent(parent) {}
+};
 
-        tree_vertex(int const& index, shared_ptr<vector<int>> __adj, shared_ptr<int> const& parent)
-            : vertex(index, __adj), __parent(parent) {}
-    };
-
+class tree : virtual public abstract_graph {
     protected:
     vector<shared_ptr<int>> __parent;
     int __root;
@@ -39,7 +37,7 @@ class tree : virtual public abstract_graph {
         while (__parent.size() <= index)
             __parent.push_back(nullptr);
 
-        __parent[index] = nullptr;
+        __parent[index] = make_shared<int>(-1);
         abstract_graph::add_vertex();
     }
 
@@ -98,12 +96,13 @@ class tree : virtual public abstract_graph {
             if (g.vertices()[i] >= size())
                 throw runtime_error("Graph is not normalized");
 
-        if (g.vertices().size() != g.edges().size() - 1)
+        if (g.vertices().size() != g.edges().size() + 1)
             throw runtime_error("Graph is not structured like a tree");
-        
+
         int count = 0;
         
-        auto count_f = [&count](int index, int last,
+        auto count_f = [&count]
+        (shared_ptr<vertex> const& v_ptr, shared_ptr<edge> const& e_ptr,
         vector<bfs_state> const& state) {
             ++count;
             return true;
@@ -116,16 +115,19 @@ class tree : virtual public abstract_graph {
 
         for (int i = 0; i < g.vertices().size(); i++)
             add_edgeless_vertex();
-        
-        auto set_parent = [this](int index, int last,
-        vector<dfs_state> const& state, vector<int> const& d) {
-            edge& e = add_edge(last, index);
-            *__parent[index] = e.index;
+
+        auto set_parent = [this](shared_ptr<vertex> const& v_ptr,
+        shared_ptr<edge> const& e_ptr, vector<dfs_state> const& state,
+        vector<int> const& d) {
+            if (!e_ptr) return true;
+            edge& e = add_edge(other_vertex(*e_ptr, v_ptr->index), v_ptr->index);
+            *__parent[v_ptr->index] = e.index;
             return true;
         };
 
-        auto nothing = [](int a, int b,
-        vector<dfs_state> const& c, vector<int> const& d) {};
+        auto nothing = [](shared_ptr<vertex> const& v_ptr,
+        shared_ptr<edge> const& e_ptr, vector<dfs_state> const& state,
+        vector<int> const& d) {};
 
         g.dfs(root, set_parent, nothing);
     }
@@ -145,22 +147,26 @@ class tree : virtual public abstract_graph {
         *__parent[index] = e.index;
     }
 
-    //Removes all descendants as well
+    //Removes all descendants as well, set new parent first if not intended
     virtual void remove_vertex(int index) override {
         vector<int> indices, edge_i;
         int parent = get_vertex(index).parent();
 
-        auto collect = [&parent, &indices, this](int i, int last,
-        vector<bfs_state> const& state) {
-            if (last == parent) return false;
-            indices.push_back(i);
+        auto collect = [&parent, &indices, this]
+        (shared_ptr<vertex> const& v_ptr,
+        shared_ptr<edge> const& e_ptr, vector<bfs_state> const& state) {
+            if (e_ptr && e_ptr->index == parent) return false;
+            indices.push_back(v_ptr->index);
             return true;
         };
 
         bfs(index, collect);
 
-        for (int i : indices)
-            remove_edge(get_vertex(i).parent());
+        for (int i : indices) {
+            tree_vertex const& u = get_vertex(i);
+            if (u.parent() == -1) continue;
+            remove_edge(u.parent());
+        }
 
         for (int i : indices)
             abstract_graph::remove_vertex(i);
