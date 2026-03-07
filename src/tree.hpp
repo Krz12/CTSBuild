@@ -1,9 +1,9 @@
 #pragma once
 
-#include "abstract_graph.hpp"
 #include <cstddef>
 #include <memory>
 #include <stdexcept>
+#include "graph.hpp"
 using namespace std;
 
 class tree : virtual public abstract_graph {
@@ -26,12 +26,12 @@ class tree : virtual public abstract_graph {
     vector<shared_ptr<int>> __parent;
     int __root;
 
-    virtual void create_vertex(int index, unique_ptr<vertex> & ptr) override {
-        ptr = make_unique<tree_vertex>(index, __adj[index], __parent[index]);
+    virtual void create_vertex(int index, shared_ptr<vertex> & ptr) override {
+        ptr = make_shared<tree_vertex>(index, __adj[index], __parent[index]);
     }
 
-    virtual void create_edge(int index, int u, int v, unique_ptr<edge> & ptr) override {
-        ptr = make_unique<edge>(index, u, v);
+    virtual void create_edge(int index, int u, int v, shared_ptr<edge> & ptr) override {
+        ptr = make_shared<edge>(index, u, v);
     }
 
     virtual void add_edgeless_vertex() {
@@ -45,6 +45,7 @@ class tree : virtual public abstract_graph {
 
     public:
     virtual tree_vertex& get_vertex(int index) override {
+        abstract_graph::get_vertex(index);
         tree_vertex* ptr = dynamic_cast<tree_vertex*>(__vertices[index].get());
         if (!ptr)
             throw runtime_error("Vertex " + to_string(index) + " is not a tree_vertex");
@@ -56,25 +57,33 @@ class tree : virtual public abstract_graph {
     }
 
     virtual tree_vertex const& get_vertex(int index) const override {
-        return get_vertex(index);
+        abstract_graph::get_vertex(index);
+        tree_vertex* ptr = dynamic_cast<tree_vertex*>(__vertices[index].get());
+        if (!ptr)
+            throw runtime_error("Vertex " + to_string(index) + " is not a tree_vertex");
+        return *ptr;
     }
     
     virtual tree_vertex const& operator[](int index) const override {
         return get_vertex(index);
     }
 
-    virtual void add_vertex(int parent) {
+    virtual tree_vertex& add_vertex(int parent) {
         get_vertex(parent);
-        if (!has_edge(parent))
+        if (!has_vertex(parent))
             throw runtime_error("Parent does not exist");
 
         int index = next_vertex_index();
         while (__parent.size() <= index)
             __parent.push_back(nullptr);
 
-        __parent[index] = make_shared<int>(parent);
+        __parent[index] = make_shared<int>(0);
         abstract_graph::add_vertex();
-        add_edge(parent, index);
+
+        edge& e = add_edge(parent, index);
+        *__parent[index] = e.index;
+
+        return get_vertex(index);
     }
 
     /*
@@ -126,7 +135,7 @@ class tree : virtual public abstract_graph {
         add_edgeless_vertex();
     }
 
-    void set_parent(int index, int parent) {
+    virtual void set_parent(int index, int parent) {
         get_vertex(parent);
         if (!has_edge(parent))
             throw runtime_error("Parent does not exist");
@@ -135,4 +144,27 @@ class tree : virtual public abstract_graph {
         edge& e = add_edge(parent, index);
         *__parent[index] = e.index;
     }
+
+    //Removes all descendants as well
+    virtual void remove_vertex(int index) override {
+        vector<int> indices, edge_i;
+        int parent = get_vertex(index).parent();
+
+        auto collect = [&parent, &indices, this](int i, int last,
+        vector<bfs_state> const& state) {
+            if (last == parent) return false;
+            indices.push_back(i);
+            return true;
+        };
+
+        bfs(index, collect);
+
+        for (int i : indices)
+            remove_edge(get_vertex(i).parent());
+
+        for (int i : indices)
+            abstract_graph::remove_vertex(i);
+    }
+
+    virtual ~tree() override {}
 };

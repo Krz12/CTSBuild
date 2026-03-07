@@ -1,10 +1,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <chrono>
+#include "graph.hpp"
 #include "window.hpp"
 #include "math/vector2.hpp"
 #include "runtime_data.hpp"
-#include <chrono>
-#include "graph.hpp"
 #include "tree.hpp"
 using namespace std;
 
