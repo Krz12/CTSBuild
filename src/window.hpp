@@ -9,7 +9,7 @@ using namespace std;
 class window {
     private:
     GLFWwindow* __api_window;
-    bool __v_sync = 0;
+    bool __vsync = 0;
     chrono::time_point<chrono::high_resolution_clock> lastTime = chrono::high_resolution_clock::now();
 
     public:
@@ -74,12 +74,12 @@ class window {
     }
 
     void vsync(bool b) {
-        __v_sync = b;
-        glfwSwapInterval(__v_sync);
+        __vsync = b;
+        glfwSwapInterval(__vsync);
     }
 
     bool vsync() const {
-        return __v_sync;
+        return __vsync;
     }
 
     vector2<int> size() const {

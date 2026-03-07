@@ -10,7 +10,8 @@ using namespace std;
 
 int main() {
     window main_window(window::DEFAULT_SIZE, "CTSBuild");
-    
+    main_window.vsync(false);
+
     while (main_window.is_open()) {
         runtime_data::update();
         main_window.update();
