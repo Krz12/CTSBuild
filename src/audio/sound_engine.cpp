@@ -1,4 +1,3 @@
-#define MINIAUDIO_IMPLEMENTATION
 #include "sound_engine.hpp"
 #include "sound3d.hpp"
 #include "sound2d.hpp"

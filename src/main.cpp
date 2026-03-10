@@ -7,7 +7,8 @@
 using namespace std;
 
 int main() {
-    chdir(get_executable_directory().c_str()); 
+    int r = chdir(get_executable_directory().c_str());
+    if (r != 0) throw runtime_error("Chdir failed");
     //scene_tree t;
     //game_object obj = game_object::create(t, 0);
 
