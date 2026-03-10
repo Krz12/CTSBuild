@@ -16,6 +16,7 @@ endif()
 # Ścieżki do nagłówków
 include_directories(
     ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/external
     /usr/include/freetype2
 )
 
