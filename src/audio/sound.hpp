@@ -4,12 +4,21 @@
 #include "sound_categories.hpp"
 #include <memory>
 
+namespace sound_engine {
+    bool is_initialized();
+}
+
 class sound : public std::enable_shared_from_this<sound>
 {
 protected:
     struct SoundDeleter {
         void operator()(ma_sound* s) const {
-            if (s) ma_sound_uninit(s);
+            if (!s) return;
+            // Avoid calling into miniaudio after the engine is uninitialized.
+            if (sound_engine::is_initialized()) {
+                ma_sound_uninit(s);
+            }
+            delete s;
         }
     };
     std::unique_ptr<ma_sound, SoundDeleter> m_sound;

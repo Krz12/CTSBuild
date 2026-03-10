@@ -9,6 +9,12 @@ using namespace std;
 
 namespace sound_engine {
     static ma_engine g_engine;
+    static bool g_is_initialized = false;
+
+    bool is_initialized() {
+        return g_is_initialized;
+    }
+
     // Grupy dla poszczególnych kategorii (umożliwiają niezależną kontrolę głośności)
     static ma_sound_group g_group_ui;
     static ma_sound_group g_group_sfx;
