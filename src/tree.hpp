@@ -8,18 +8,19 @@ using namespace std;
 
 class tree_vertex : virtual public vertex {
     protected:
-    shared_ptr<int> __parent; //index of edge, not vertex
+    const shared_ptr<int> __parent; //index of edge, not vertex
 
     public:
     virtual int parent() const {
         return *__parent;
     }
 
-    tree_vertex(int const& index, shared_ptr<vector<int>> __adj, shared_ptr<int> const& parent)
+    tree_vertex(int const& index, shared_ptr<vector<int>> const& __adj, shared_ptr<int> const& parent)
         : vertex(index, __adj), __parent(parent) {}
+    tree_vertex() : tree_vertex(-1, nullptr, nullptr) {}
 };
 
-class tree : virtual public abstract_graph {
+class abstract_tree : virtual public abstract_graph {
     protected:
     vector<shared_ptr<int>> __parent;
     int __root;
@@ -32,13 +33,14 @@ class tree : virtual public abstract_graph {
         ptr = make_shared<edge>(index, u, v);
     }
 
-    virtual void add_edgeless_vertex() {
+    virtual tree_vertex& add_edgeless_vertex() {
         int index = next_vertex_index();
         while (__parent.size() <= index)
             __parent.push_back(nullptr);
 
         __parent[index] = make_shared<int>(-1);
         abstract_graph::add_vertex();
+        return get_vertex(index);
     }
 
     public:
@@ -66,6 +68,42 @@ class tree : virtual public abstract_graph {
         return get_vertex(index);
     }
 
+    protected:
+    virtual void set_parent(int index, int parent) {
+        get_vertex(parent);
+        if (!has_edge(parent))
+            throw runtime_error("Parent does not exist");
+
+        remove_edge(get_vertex(index).parent());
+        edge& e = add_edge(parent, index);
+        *__parent[index] = e.index;
+    }
+
+    //Removes all descendants as well, set new parent first if not intended
+    virtual void remove_vertex(int index) override {
+        vector<int> indices, edge_i;
+        int parent = get_vertex(index).parent();
+
+        auto collect = [&parent, &indices, this]
+        (shared_ptr<vertex> const& v_ptr,
+        shared_ptr<edge> const& e_ptr, vector<bfs_state> const& state) {
+            if (e_ptr && e_ptr->index == parent) return false;
+            indices.push_back(v_ptr->index);
+            return true;
+        };
+
+        bfs(index, collect);
+
+        for (int i : indices) {
+            tree_vertex const& u = get_vertex(i);
+            if (u.parent() == -1) continue;
+            remove_edge(u.parent());
+        }
+
+        for (int i : indices)
+            abstract_graph::remove_vertex(i);
+    }
+
     virtual tree_vertex& add_vertex(int parent) {
         get_vertex(parent);
         if (!has_vertex(parent))
@@ -84,16 +122,24 @@ class tree : virtual public abstract_graph {
         return get_vertex(index);
     }
 
+    public:
+
+    virtual ~abstract_tree() override {}
+};
+
+class tree : virtual public abstract_tree {
+    public:
     /*
         -g is the reference graph the tree will be built on,
         it must be normalized, have exactly one component, and be acyclic
     */
-    tree(abstract_graph const& g, int const& root) : __root(root) {
+    tree(abstract_graph const& g, int const& root) {
+        __root = root;
         if (g.vertices().size() != g.size())
             throw runtime_error("Graph is not normalized");
 
-        for (int i = 0; i < size(); i++)
-            if (g.vertices()[i] >= size())
+        for (int i = 0; i < g.size(); i++)
+            if (g.vertices()[i] >= g.size())
                 throw runtime_error("Graph is not normalized");
 
         if (g.vertices().size() != g.edges().size() + 1)
@@ -133,43 +179,21 @@ class tree : virtual public abstract_graph {
     }
 
     //Root = 0
-    tree() : __root(0) {
+    tree() {
+        __root = 0;
         add_edgeless_vertex();
     }
 
-    virtual void set_parent(int index, int parent) {
-        get_vertex(parent);
-        if (!has_edge(parent))
-            throw runtime_error("Parent does not exist");
-
-        remove_edge(get_vertex(index).parent());
-        edge& e = add_edge(parent, index);
-        *__parent[index] = e.index;
+    tree_vertex& add_vertex(int parent) override {
+        return abstract_tree::add_vertex(parent);
     }
 
-    //Removes all descendants as well, set new parent first if not intended
-    virtual void remove_vertex(int index) override {
-        vector<int> indices, edge_i;
-        int parent = get_vertex(index).parent();
+    void set_parent(int index, int parent) override {
+        abstract_tree::set_parent(index, parent);
+    }
 
-        auto collect = [&parent, &indices, this]
-        (shared_ptr<vertex> const& v_ptr,
-        shared_ptr<edge> const& e_ptr, vector<bfs_state> const& state) {
-            if (e_ptr && e_ptr->index == parent) return false;
-            indices.push_back(v_ptr->index);
-            return true;
-        };
-
-        bfs(index, collect);
-
-        for (int i : indices) {
-            tree_vertex const& u = get_vertex(i);
-            if (u.parent() == -1) continue;
-            remove_edge(u.parent());
-        }
-
-        for (int i : indices)
-            abstract_graph::remove_vertex(i);
+    void remove_vertex(int index) override {
+        abstract_tree::remove_vertex(index);
     }
 
     virtual ~tree() override {}
