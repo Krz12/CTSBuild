@@ -4,7 +4,7 @@
 #include <future>
 #include <memory>
 #include <stdexcept>
-#include "tree.hpp"
+#include "math/tree.hpp"
 using namespace std;
 
 class abstract_game_object : virtual public tree_vertex {

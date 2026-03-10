@@ -17,6 +17,7 @@ endif()
 include_directories(
     ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_SOURCE_DIR}/external
+    ${CMAKE_SOURCE_DIR}/engine
     /usr/include/freetype2
 )
 

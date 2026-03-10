@@ -116,6 +116,6 @@ namespace sound_engine {
     }
 
     void update() {
-        set_listener_position
+        //set_listener_position
     }
 }
