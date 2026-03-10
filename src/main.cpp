@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <chrono>
 #include "graph.hpp"
+#include "scene_tree.hpp"
 #include "window.hpp"
 #include "math/vector2.hpp"
 #include "runtime_data.hpp"
@@ -17,6 +18,9 @@ int main() {
     t.add_vertex(0);
     t.remove_vertex(0);
     
+    scene_tree t;
+    game_object obj = game_object::create(t, 0);
+
     window main_window(window::DEFAULT_SIZE, "CTSBuild");
     main_window.vsync(false);
     sound_engine::init();
