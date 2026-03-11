@@ -23,6 +23,8 @@ class vertex {
         return *__adj;
     }
 
+    virtual ~vertex() {}
+
     vertex(int index, shared_ptr<vector<int>> const& adj)
         : index(index), __adj(adj) {}
     vertex() : index(-4), __adj(nullptr) {}

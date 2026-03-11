@@ -10,7 +10,7 @@ using namespace std;
 
 int main() {
     scene_tree t;
-    abstract_game_object g = t.get_object(0);
+    abstract_game_object & g = t.get_object(0);
     game_object::create(t, g);
 
     int r = chdir(get_executable_directory().c_str());
