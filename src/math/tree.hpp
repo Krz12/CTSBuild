@@ -43,8 +43,6 @@ class abstract_tree : virtual public abstract_graph {
 
     virtual tree_vertex& add_edgeless_vertex() {
         int index = next_vertex_index();
-
-        __parent[index] = make_shared<int>(-1);
         abstract_graph::add_vertex();
         return get_vertex(index);
     }
@@ -116,8 +114,6 @@ class abstract_tree : virtual public abstract_graph {
             throw runtime_error("Parent does not exist");
 
         int index = next_vertex_index();
-
-        __parent[index] = make_shared<int>(0);
         abstract_graph::add_vertex();
 
         edge& e = add_edge(parent, index);

@@ -10,8 +10,8 @@ using namespace std;
 
 int main() {
     scene_tree t;
-    abstract_game_object & g = t.get_object(0);
-    game_object::create(t, g);
+    abstract_game_object & p = t.get_object(0);
+    game_object g = *game_object::create(t, p);
 
     int r = chdir(get_executable_directory().c_str());
     if (r != 0) throw runtime_error("Chdir failed");
