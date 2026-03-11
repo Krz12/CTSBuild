@@ -17,7 +17,6 @@ class tree_vertex : virtual public vertex {
 
     tree_vertex(int const& index, shared_ptr<vector<int>> const& __adj, shared_ptr<int> const& parent)
         : vertex(index, __adj), __parent(parent) {}
-    tree_vertex() : tree_vertex(-1, nullptr, nullptr) {}
 };
 
 class abstract_tree : virtual public abstract_graph {
@@ -33,10 +32,17 @@ class abstract_tree : virtual public abstract_graph {
         ptr = make_shared<edge>(index, u, v);
     }
 
+    virtual int next_vertex_index() override {
+        int index = abstract_graph::next_vertex_index();
+
+        while (__parent.size() <= index)
+            __parent.push_back(make_shared<int>(-1));
+
+        return index;
+    }
+
     virtual tree_vertex& add_edgeless_vertex() {
         int index = next_vertex_index();
-        while (__parent.size() <= index)
-            __parent.push_back(nullptr);
 
         __parent[index] = make_shared<int>(-1);
         abstract_graph::add_vertex();
@@ -110,8 +116,6 @@ class abstract_tree : virtual public abstract_graph {
             throw runtime_error("Parent does not exist");
 
         int index = next_vertex_index();
-        while (__parent.size() <= index)
-            __parent.push_back(nullptr);
 
         __parent[index] = make_shared<int>(0);
         abstract_graph::add_vertex();

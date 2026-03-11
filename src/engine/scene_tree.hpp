@@ -5,6 +5,7 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include "math/graph.hpp"
 #include "math/tree.hpp"
 using namespace std;
 
@@ -12,8 +13,8 @@ class abstract_game_object : virtual public tree_vertex {
     public:
     abstract_game_object(int const& index, shared_ptr<vector<int>> const& __adj,
     shared_ptr<int> const& parent)
-        : tree_vertex(index, __adj, parent) {}
-    abstract_game_object() : tree_vertex(-1, nullptr, nullptr) {}
+        : vertex(index, __adj),
+    tree_vertex(index, __adj, parent) {}
 
     abstract_game_object& parent_object();
 };
@@ -71,7 +72,7 @@ class scene_tree : virtual public abstract_tree {
     }
 
     shared_ptr<int> const& parent_ptr(int index) {
-        if (index < 0 || __parent.size() < index)
+        if (index < 0 || __parent.size() <= index)
             throw runtime_error("Index " + to_string(index) + " is out of bounds");
         return __parent[index];
     }
@@ -91,14 +92,16 @@ class scene_tree : virtual public abstract_tree {
 
 class game_object : virtual public abstract_game_object {
     protected:
-    shared_ptr<scene_tree> __tree;
+    scene_tree & __tree;
     bool __active = true;
 
     public:
 
     scene_tree& tree() {
-        return *__tree;
+        return __tree;
     }
+
+    /*
 
     game_object& parent_object() {
         int other = __tree->other_vertex(__tree->get_edge(parent()), index);
@@ -146,11 +149,19 @@ class game_object : virtual public abstract_game_object {
         return __active;
     }
 
+    */
+
     //Do not instantiate directly, use game_object::create() instead
     game_object(scene_tree* tree)
-        : abstract_game_object(tree->next_index(), tree->next_adj(),
-        tree->parent_ptr(tree->next_index())) {}
-    game_object() : game_object(nullptr) {}
+        : vertex(tree->next_index(), tree->next_adj()),
+
+        tree_vertex(tree->next_index(), tree->next_adj(),
+        tree->parent_ptr(tree->next_index())),
+
+        abstract_game_object(tree->next_index(), tree->next_adj(),
+        tree->parent_ptr(tree->next_index())),
+        
+        __tree(*tree) {}
 
     static shared_ptr<game_object> create(scene_tree & tree, abstract_game_object & parent) {
         shared_ptr<game_object> ptr = make_shared<game_object>(&tree);
@@ -165,7 +176,15 @@ class root_object : virtual public game_object {
 
     //do not instantiate directly
     root_object(scene_tree* tree)
-    : game_object(tree) {}
+        : vertex(tree->next_index(), tree->next_adj()),
+
+        tree_vertex(tree->next_index(), tree->next_adj(),
+        tree->parent_ptr(tree->next_index())),
+
+        abstract_game_object(tree->next_index(), tree->next_adj(),
+        tree->parent_ptr(tree->next_index())),
+
+        game_object(tree) {}
 };
 
 void scene_tree::add_root_object() {
