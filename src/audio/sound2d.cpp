@@ -20,8 +20,12 @@ void sound2d::pause() {
     pause_internal();
 }
 
-void sound2d::set_volume(float volume) {
+void sound2d::volume(float volume) {
     ma_sound_set_volume(m_sound.get(), volume);
+}
+
+float sound2d::volume() {
+    return ma_sound_get_volume(m_sound.get());
 }
 
 void sound2d::loop(bool b) {

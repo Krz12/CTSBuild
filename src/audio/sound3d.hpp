@@ -11,7 +11,8 @@ public:
     void play() override;
     void stop() override;
     void pause() override;
-    void set_volume(float volume) override;
+    void volume(float volume) override;
+    float volume() override;
     void loop(bool b) override;
     bool is_playing() override;
     sound_category category() const override;

@@ -51,6 +51,8 @@ namespace sound_engine {
 
         result = ma_sound_group_init(&g_engine, 0, nullptr, &g_group_music);
         if (result != MA_SUCCESS) throw runtime_error("Failed to create music group");
+
+        g_is_initialized = true;
     }
 
     void uninit() {
@@ -58,6 +60,8 @@ namespace sound_engine {
         ma_sound_group_uninit(&g_group_sfx);
         ma_sound_group_uninit(&g_group_ui);
         ma_engine_uninit(&g_engine);
+
+        g_is_initialized = false;
     }
 
     void load_file(const string& sound_name, const string& filepath) {
@@ -102,6 +106,16 @@ namespace sound_engine {
 
         out->play();
         return out;
+    }
+
+    void volume(sound_category category, float vol)
+    {
+        ma_sound_group_set_volume(get_group(category), vol);
+    }
+
+    float volume(sound_category category)
+    {
+        return ma_sound_group_get_volume(get_group(category));
     }
 
     

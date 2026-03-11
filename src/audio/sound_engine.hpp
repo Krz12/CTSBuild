@@ -9,6 +9,8 @@ namespace sound_engine {
     void init();
     void uninit();
     void load_file(const std::string& sound_name, const std::string& filepath);
+    void volume(sound_category category, float vol);
+    float volume(sound_category category);
 
     // Odtworzenie dźwięku o podanej nazwie (musi być wcześniej załadowana)
     // use3d = true => 3D sound (requires listener setup)

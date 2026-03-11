@@ -4,6 +4,7 @@
 #include "engine/engine_library.hpp"
 #include "audio/sound_library.hpp"
 #include "math/vector2.hpp"
+#include "input/input_manager.hpp"
 using namespace std;
 
 int main() {
@@ -22,6 +23,7 @@ int main() {
     while (main_window.is_open()) {
         runtime_data::update();
         main_window.update();
+        sound_engine::update();
     }
     
     sound_engine::uninit();
