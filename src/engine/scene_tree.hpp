@@ -165,8 +165,7 @@ class root_object : virtual public game_object {
 
     //do not instantiate directly
     root_object(scene_tree* tree)
-    : abstract_game_object(tree->next_index(), tree->next_adj(),
-    tree->parent_ptr(tree->next_index())) {}
+    : game_object(tree) {}
 };
 
 void scene_tree::add_root_object() {

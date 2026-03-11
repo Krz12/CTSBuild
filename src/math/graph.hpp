@@ -25,7 +25,7 @@ class vertex {
 
     vertex(int index, shared_ptr<vector<int>> const& adj)
         : index(index), __adj(adj) {}
-    vertex() : index(-1), __adj(nullptr) {}
+    vertex() : index(-4), __adj(nullptr) {}
 };
 
 class edge {

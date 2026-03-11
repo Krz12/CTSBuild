@@ -9,10 +9,12 @@
 using namespace std;
 
 int main() {
+    scene_tree t;
+    abstract_game_object g = t.get_object(0);
+    game_object::create(t, g);
+
     int r = chdir(get_executable_directory().c_str());
     if (r != 0) throw runtime_error("Chdir failed");
-    //scene_tree t;
-    //game_object obj = game_object::create(t, 0);
 
     window main_window(window::DEFAULT_SIZE, "CTSBuild");
     main_window.vsync(false);
