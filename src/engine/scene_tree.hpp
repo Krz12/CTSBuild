@@ -4,6 +4,7 @@
 #include <future>
 #include <memory>
 #include <stdexcept>
+#include <string>
 #include "math/tree.hpp"
 using namespace std;
 
@@ -29,7 +30,10 @@ class scene_tree : virtual public abstract_tree {
         ptr = make_shared<edge>(index, u, v);
     }
 
-    abstract_game_object& get_vertex(int index) override {
+    public:
+    void add_root_object();
+
+    abstract_game_object& get_object(int index) {
         abstract_tree::get_vertex(index);
         abstract_game_object* ptr = dynamic_cast<abstract_game_object*>(__vertices[index].get());
         if (!ptr)
@@ -37,7 +41,7 @@ class scene_tree : virtual public abstract_tree {
         return *ptr;
     }
 
-    abstract_game_object const& get_vertex(int index) const override {
+    abstract_game_object const& get_object(int index) const {
         abstract_tree::get_vertex(index);
         abstract_game_object* ptr = dynamic_cast<abstract_game_object*>(__vertices[index].get());
         if (!ptr)
@@ -45,23 +49,12 @@ class scene_tree : virtual public abstract_tree {
         return *ptr;
     }
 
-    public:
-    void add_root_object();
-
-    abstract_game_object& get_object(int index) {
-        return get_vertex(index);
-    }
-
-    abstract_game_object const& get_object(int index) const {
-        return get_vertex(index);
-    }
-
     abstract_game_object& operator[](int index) override {
-        return get_vertex(index);
+        return get_object(index);
     }
 
     abstract_game_object const& operator[](int index) const override {
-        return get_vertex(index);
+        return get_object(index);
     }
 
     scene_tree() {
@@ -74,11 +67,12 @@ class scene_tree : virtual public abstract_tree {
     }
 
     shared_ptr<vector<int>> const& next_adj() {
-        return __adj[next_vertex_index()];
+        return __adj[next_index()];
     }
 
     shared_ptr<int> const& parent_ptr(int index) {
-        get_vertex(index);
+        if (index < 0 || __parent.size() < index)
+            throw runtime_error("Index " + to_string(index) + " is out of bounds");
         return __parent[index];
     }
 
@@ -158,10 +152,10 @@ class game_object : virtual public abstract_game_object {
         tree->parent_ptr(tree->next_index())) {}
     game_object() : game_object(nullptr) {}
 
-    static shared_ptr<game_object> create(scene_tree & tree, int parent) {
+    static shared_ptr<game_object> create(scene_tree & tree, abstract_game_object & parent) {
         shared_ptr<game_object> ptr = make_shared<game_object>(&tree);
         shared_ptr<abstract_game_object> abs_ptr = dynamic_pointer_cast<abstract_game_object>(ptr);
-        tree.add_object(abs_ptr, parent);
+        tree.add_object(abs_ptr, parent.index);
         return ptr;
     }
 };
@@ -181,5 +175,6 @@ void scene_tree::add_root_object() {
     
     shared_ptr<root_object> ptr = make_shared<root_object>(this);
     int index = add_edgeless_vertex().index;
+
     __vertices[index] = ptr;
 }
