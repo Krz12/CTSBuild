@@ -9,11 +9,6 @@
 using namespace std;
 
 int main() {
-    scene_tree t;
-    game_object::create(t, t.get_object(0));
-    
-    return 0;
-
     int r = chdir(get_executable_directory().c_str());
     if (r != 0) throw runtime_error("Chdir failed");
     //scene_tree t;

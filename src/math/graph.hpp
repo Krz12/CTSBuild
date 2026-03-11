@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstddef>
 #include <iostream>
 #include <memory>
 #include <queue>
@@ -8,15 +7,9 @@
 #include <stdexcept>
 #include <string>
 #include <utility>
-#include <variant>
 #include <vector>
-#include <type_traits>
 using namespace std;
-
 #define pii pair<int, int>
-#include <memory>
-#include <vector>
-using namespace std;
 
 class vertex {
     public:
