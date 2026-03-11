@@ -2,7 +2,6 @@
 
 #include <cstddef>
 #include <future>
-#include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -20,8 +19,6 @@ class abstract_game_object : virtual public tree_vertex {
 };
 
 class scene_tree : virtual public abstract_tree {
-    friend class game_object;
-
     protected:
 
     //not recommended for use, instantiate game_object or its derived classes instead
@@ -74,15 +71,9 @@ class scene_tree : virtual public abstract_tree {
     }
 
     shared_ptr<int> const& parent_ptr(int index) {
-        if (index < 0 || index >= static_cast<int>(__parent.size()))
+        if (index < 0 || __parent.size() < index)
             throw runtime_error("Index " + to_string(index) + " is out of bounds");
         return __parent[index];
-    }
-
-    shared_ptr<vector<int>> const& adj_ptr(int index) {
-        if (index < 0 || index >= static_cast<int>(__adj.size()))
-            throw runtime_error("Index " + to_string(index) + " is out of bounds");
-        return __adj[index];
     }
 
     //do not use directly, instantiate a game_object instead
@@ -100,7 +91,7 @@ class scene_tree : virtual public abstract_tree {
 
 class game_object : virtual public abstract_game_object {
     protected:
-    scene_tree* __tree;
+    shared_ptr<scene_tree> __tree;
     bool __active = true;
 
     public:
@@ -128,10 +119,10 @@ class game_object : virtual public abstract_game_object {
     }
 
     game_object& child_object(int adj_index) {
-        if (adj_index < 0 || adj_index >= static_cast<int>(edges().size()))
+        if (index < 0 || index >= edges().size())
             throw runtime_error("Index " + to_string(adj_index) + " is out of bounds");
 
-        int other = __tree->other_vertex(__tree->get_edge(edges()[adj_index]), index);
+        int other = __tree->other_vertex(__tree->get_edge((*__adj)[adj_index]), index);
         game_object* ptr = dynamic_cast<game_object*>(&__tree->get_object(other));
 
         if (!ptr)
@@ -140,10 +131,10 @@ class game_object : virtual public abstract_game_object {
     }
 
     game_object const& child_object(int adj_index) const {
-        if (adj_index < 0 || adj_index >= static_cast<int>(edges().size()))
+        if (index < 0 || index >= edges().size())
             throw runtime_error("Index " + to_string(adj_index) + " is out of bounds");
 
-        int other = __tree->other_vertex(__tree->get_edge(edges()[adj_index]), index);
+        int other = __tree->other_vertex(__tree->get_edge((*__adj)[adj_index]), index);
         game_object* ptr = dynamic_cast<game_object*>(&__tree->get_object(other));
 
         if (!ptr)
@@ -155,18 +146,16 @@ class game_object : virtual public abstract_game_object {
         return __active;
     }
 
-    // Do not instantiate directly, use game_object::create() instead
-    game_object(scene_tree* tree, int index)
-        : abstract_game_object(index, tree->adj_ptr(index), tree->parent_ptr(index)),
-        __tree(tree) {}
-
-    game_object() = delete;
+    //Do not instantiate directly, use game_object::create() instead
+    game_object(scene_tree* tree)
+        : abstract_game_object(tree->next_index(), tree->next_adj(),
+        tree->parent_ptr(tree->next_index())) {}
+    game_object() : game_object(nullptr) {}
 
     static shared_ptr<game_object> create(scene_tree & tree, abstract_game_object & parent) {
-        int index = tree.add_vertex(parent.index).index;
-        shared_ptr<game_object> ptr = make_shared<game_object>(&tree, index);
+        shared_ptr<game_object> ptr = make_shared<game_object>(&tree);
         shared_ptr<abstract_game_object> abs_ptr = dynamic_pointer_cast<abstract_game_object>(ptr);
-        tree.__vertices[index] = abs_ptr;
+        tree.add_object(abs_ptr, parent.index);
         return ptr;
     }
 };
@@ -175,18 +164,16 @@ class root_object : virtual public game_object {
     public:
 
     //do not instantiate directly
-    root_object(scene_tree* tree, int index)
-        : vertex(index, tree->adj_ptr(index)),
-        tree_vertex(index, tree->adj_ptr(index), tree->parent_ptr(index)),
-        abstract_game_object(index, tree->adj_ptr(index), tree->parent_ptr(index)),
-        game_object(tree, index) {}
+    root_object(scene_tree* tree)
+    : game_object(tree) {}
 };
 
 void scene_tree::add_root_object() {
     if (size() != 0)
         throw runtime_error("Root object already exists");
     
+    shared_ptr<root_object> ptr = make_shared<root_object>(this);
     int index = add_edgeless_vertex().index;
-    shared_ptr<root_object> ptr = make_shared<root_object>(this, index);
+
     __vertices[index] = ptr;
 }
