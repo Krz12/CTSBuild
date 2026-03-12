@@ -4,35 +4,36 @@
 using namespace std;
 
 template <typename T>
-class vector2 {
+class vector3 {
     private:
     double __magnitude = 0;
     double __angle = 0;
 
-    T __x_cache = 0, __y_cache = 0;
+    T __x_cache = 0, __y_cache = 0, __z_cache = 0;
 
     bool check_cache() {
-        if (x != __x_cache || y != __y_cache) {
+        if (x != __x_cache || y != __y_cache || z != __z_cache) {
             __magnitude = -INFINITY;
             __angle = -INFINITY;
             __x_cache = x;
             __y_cache = y;
+            __z_cache = z;
             return false;
         }
         return true;
     }
 
     public:
-    T x, y;
+    T x, y, z;
 
-    vector2(T x, T y) : x(x), y(y) {
+    vector3(T x, T y, T z) : x(x), y(y), z(z) {
         
     }
 
-    const static vector2<double> ZERO;
+    const static vector3<double> ZERO;
 
     double magnitude_squared() {
-        return x * x + y * y;
+        return x * x + y * y + z * z;
     }
 
     double magnitude() {
@@ -45,118 +46,128 @@ class vector2 {
     double angle() {
         check_cache();
         if (__angle == -INFINITY)
-            __angle = atan2(y, x);
+            __angle = atan2(y, x); //idk tbh
         return __angle;
     }
 
-    double dot(vector2<T> const& other) {
-        return x * other.x + y * other.y;
+    double dot(vector3<T> const& other) {
+        return x * other.x + y * other.y + z * other.z;
     }
 
     void normalize() {
         double inverse_magnitude = 1 / magnitude();
         x *= inverse_magnitude;
         y *= inverse_magnitude;
+        z *= inverse_magnitude;
         __x_cache = x;
         __y_cache = y;
+        __z_cache = z;
         __magnitude = 1;
     }
 
     //vector, vector operations
-    vector2<T>& operator+=(vector2<T> const& other) {
+    vector3<T>& operator+=(vector3<T> const& other) {
         x += other.x;
         y += other.y;
+        z += other.z;
         return *this;
     }
 
-    vector2<T>& operator-=(vector2<T> const& other) {
+    vector3<T>& operator-=(vector3<T> const& other) {
         x -= other.x;
         y -= other.y;
+        z -= other.z;
         return *this;
     }
 
-    vector2<T>& operator*=(vector2<T> const& other) {
+    vector3<T>& operator*=(vector3<T> const& other) {
         x *= other.x;
         y *= other.y;
+        z *= other.z;
         return *this;
     }
 
-    vector2<T>& operator/=(vector2<T> const& other) {
+    vector3<T>& operator/=(vector3<T> const& other) {
         x /= other.x;
         y /= other.y;
+        z /= other.z;
         return *this;
     }
 
-    vector2<T> operator+(vector2<T> const& other) {
-        vector2<T> result = *this;
+    vector3<T> operator+(vector3<T> const& other) {
+        vector3<T> result = *this;
         result += other;
         return result;
     }
 
-    vector2<T> operator-(vector2<T> const& other) {
-        vector2<T> result = *this;
+    vector3<T> operator-(vector3<T> const& other) {
+        vector3<T> result = *this;
         result -= other;
         return result;
     }
 
-    vector2<T> operator*(vector2<T> const& other) {
-        vector2<T> result = *this;
+    vector3<T> operator*(vector3<T> const& other) {
+        vector3<T> result = *this;
         result *= other;
         return result;
     }
 
-    vector2<T> operator/(vector2<T> const& other) {
-        vector2<T> result = *this;
+    vector3<T> operator/(vector3<T> const& other) {
+        vector3<T> result = *this;
         result /= other;
         return result;
     }
 
     //vector, double operations
-    vector2<T>& operator*=(double const& scalar) {
+    vector3<T>& operator*=(double const& scalar) {
         x *= scalar;
         y *= scalar;
+        z *= scalar;
         __x_cache = x;
         __y_cache = y;
+        __z_cache = z;
         __magnitude *= scalar;
         return *this;
     }
 
-    friend vector2<T>& operator*=(double const& scalar, vector2<T> const& v) {
+    friend vector3<T>& operator*=(double const& scalar, vector3<T> const& v) {
         return v *= scalar;
     }
 
-    vector2<T>& operator/=(double const& scalar) {
+    vector3<T>& operator/=(double const& scalar) {
         x /= scalar;
         y /= scalar;
+        z /= scalar;
         __x_cache = x;
         __y_cache = y;
+        __z_cache = z;
         __magnitude /= scalar;
         return *this;
     }
 
-    friend vector2<T>& operator/=(double const& scalar, vector2<T> const& v) {
+    friend vector3<T>& operator/=(double const& scalar, vector3<T> const& v) {
         return v /= scalar;
     }
 
-    vector2<T> operator*(double const& scalar) {
-        vector2<T> v(*this);
+    vector3<T> operator*(double const& scalar) {
+        vector3<T> v(*this);
         v *= scalar;
         return v;
     }
 
-    friend vector2<T>& operator*(double const& scalar, vector2<T> const& v) {
+    friend vector3<T>& operator*(double const& scalar, vector3<T> const& v) {
         return v * scalar;
     }
 
-    vector2<T> operator/(double const& scalar) {
-        vector2<T> v(*this);
+    vector3<T> operator/(double const& scalar) {
+        vector3<T> v(*this);
         v /= scalar;
         return v;
     }
 
-    friend vector2<T>& operator/(double const& scalar, vector2<T> const& v) {
+    friend vector3<T>& operator/(double const& scalar, vector3<T> const& v) {
         return v / scalar;
     }
 };
 
-template<> const vector2<double> vector2<double>::ZERO(0, 0);
+template<> const vector3<double> vector3<double>::ZERO(0, 0, 0);

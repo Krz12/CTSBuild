@@ -7,6 +7,7 @@
 #include <string>
 #include "math/graph.hpp"
 #include "math/tree.hpp"
+#include "math/vector3.hpp"
 using namespace std;
 
 class abstract_game_object : virtual public tree_vertex {
@@ -15,6 +16,8 @@ class abstract_game_object : virtual public tree_vertex {
     shared_ptr<int> const& parent)
         : vertex(index, __adj),
     tree_vertex(index, __adj, parent) {}
+
+    virtual void update() {}
 };
 
 class scene_tree : virtual public abstract_tree {
@@ -190,3 +193,41 @@ void scene_tree::add_root_object() {
     
     __vertices[index] = ptr;
 }
+
+class world_object : virtual public game_object {
+    protected:
+    vector3<double> __position;
+    vector3<double> __velocity;
+    vector3<double> __acceleration;
+    vector3<double> __rotation;
+    vector3<double> __angular_velocity;
+    vector3<double> __angular_acceleration;
+
+    public:
+
+    world_object(scene_tree* tree, vector3<double> position, vector3<double> rotation)
+        : vertex(tree->next_index(), tree->next_adj()),
+
+        tree_vertex(tree->next_index(), tree->next_adj(),
+        tree->parent_ptr(tree->next_index())),
+
+        abstract_game_object(tree->next_index(), tree->next_adj(),
+        tree->parent_ptr(tree->next_index())),
+
+        game_object(tree), __position(position), __rotation(rotation), 
+        __velocity(vector3<double>::ZERO), __angular_velocity(vector3<double>::ZERO),
+        __acceleration(vector3<double>::ZERO, vecto) {}
+
+    static shared_ptr<world_object> create(scene_tree & tree, abstract_game_object & parent,
+    vector3<double> position, vector3<double> rotation) {
+        shared_ptr<world_object> ptr = make_shared<world_object>(&tree, position, rotation);
+        shared_ptr<abstract_game_object> abs_ptr = dynamic_pointer_cast<abstract_game_object>(ptr);
+        tree.add_object(abs_ptr, parent.index);
+        return ptr;
+    }
+
+    void update() override {
+        __position += __velocity;
+        
+    }
+};
