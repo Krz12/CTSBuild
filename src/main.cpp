@@ -20,10 +20,10 @@ int main() {
     main_window.vsync(false);
     input_manager::init();
     sound_engine::init();
+    settings::load_all_settings();
     //sound_engine::load_file("trump", "../assets/sound_trump.wav");
-    
     //auto trump = sound_engine::play("trump", sound_category::sfx, false);
-    input_manager::map_action(action_type::move_forward, key::W);
+
     
     while (main_window.is_open()) {
         runtime_data::update();

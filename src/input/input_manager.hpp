@@ -12,4 +12,5 @@ namespace input_manager
     const mouse_state &get_mouse_state();
     const key get_action_mapping(const action_type &a);
     void map_action(const action_type &a, const key &k);
+    const bool is_initialized();
 }

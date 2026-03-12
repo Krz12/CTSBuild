@@ -2,3 +2,5 @@
 #include "engine/scene_tree.hpp"
 #include "engine/window.hpp"
 #include "engine/file_utils.hpp"
+#include "engine/logger.hpp"
+#include "engine/settings.hpp"
