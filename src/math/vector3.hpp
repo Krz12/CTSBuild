@@ -94,32 +94,32 @@ class vector3 {
         return *this;
     }
 
-    vector3<T> operator+(vector3<T> const& other) {
+    vector3<T> operator+(vector3<T> const& other) const {
         vector3<T> result = *this;
         result += other;
         return result;
     }
 
-    vector3<T> operator-(vector3<T> const& other) {
+    vector3<T> operator-(vector3<T> const& other) const {
         vector3<T> result = *this;
         result -= other;
         return result;
     }
 
-    vector3<T> operator*(vector3<T> const& other) {
+    vector3<T> operator*(vector3<T> const& other) const {
         vector3<T> result = *this;
         result *= other;
         return result;
     }
 
-    vector3<T> operator/(vector3<T> const& other) {
+    vector3<T> operator/(vector3<T> const& other) const {
         vector3<T> result = *this;
         result /= other;
         return result;
     }
 
     //vector, double operations
-    vector3<T>& operator*=(double const& scalar) {
+    vector3<T>& operator*=(T const& scalar) {
         x *= scalar;
         y *= scalar;
         z *= scalar;
@@ -130,11 +130,11 @@ class vector3 {
         return *this;
     }
 
-    friend vector3<T>& operator*=(double const& scalar, vector3<T> const& v) {
+    friend vector3<T>& operator*=(T const& scalar, vector3<T> & v) {
         return v *= scalar;
     }
 
-    vector3<T>& operator/=(double const& scalar) {
+    vector3<T>& operator/=(T const& scalar) {
         x /= scalar;
         y /= scalar;
         z /= scalar;
@@ -145,27 +145,27 @@ class vector3 {
         return *this;
     }
 
-    friend vector3<T>& operator/=(double const& scalar, vector3<T> const& v) {
+    friend vector3<T>& operator/=(T const& scalar, vector3<T> & v) {
         return v /= scalar;
     }
 
-    vector3<T> operator*(double const& scalar) {
+    vector3<T> operator*(T const& scalar) const {
         vector3<T> v(*this);
         v *= scalar;
         return v;
     }
 
-    friend vector3<T>& operator*(double const& scalar, vector3<T> const& v) {
+    friend vector3<T> operator*(T const& scalar, vector3<T> const& v) {
         return v * scalar;
     }
 
-    vector3<T> operator/(double const& scalar) {
+    vector3<T> operator/(T const& scalar) const {
         vector3<T> v(*this);
         v /= scalar;
         return v;
     }
 
-    friend vector3<T>& operator/(double const& scalar, vector3<T> const& v) {
+    friend vector3<T> operator/(T const& scalar, vector3<T> const& v) {
         return v / scalar;
     }
 };
