@@ -116,7 +116,7 @@ class vector2 {
     }
 
     //vector, double operations
-    vector2<T>& operator*=(double const& scalar) {
+    vector2<T>& operator*=(T const& scalar) {
         x *= scalar;
         y *= scalar;
         __x_cache = x;
@@ -125,11 +125,11 @@ class vector2 {
         return *this;
     }
 
-    friend vector2<T>& operator*=(double const& scalar, vector2<T> const& v) {
+    friend vector2<T>& operator*=(T const& scalar, vector2<T> & v) {
         return v *= scalar;
     }
 
-    vector2<T>& operator/=(double const& scalar) {
+    vector2<T>& operator/=(T const& scalar) {
         x /= scalar;
         y /= scalar;
         __x_cache = x;
@@ -138,29 +138,30 @@ class vector2 {
         return *this;
     }
 
-    friend vector2<T>& operator/=(double const& scalar, vector2<T> const& v) {
+    friend vector2<T>& operator/=(T const& scalar, vector2<T> & v) {
         return v /= scalar;
     }
 
-    vector2<T> operator*(double const& scalar) {
+    vector2<T> operator*(T const& scalar) {
         vector2<T> v(*this);
         v *= scalar;
         return v;
     }
 
-    friend vector2<T>& operator*(double const& scalar, vector2<T> const& v) {
+    friend vector2<T> operator*(T const& scalar, vector2<T> const& v) {
         return v * scalar;
     }
 
-    vector2<T> operator/(double const& scalar) {
+    vector2<T> operator/(T const& scalar) {
         vector2<T> v(*this);
         v /= scalar;
         return v;
     }
 
-    friend vector2<T>& operator/(double const& scalar, vector2<T> const& v) {
+    friend vector2<T> operator/(T const& scalar, vector2<T> const& v) {
         return v / scalar;
     }
 };
 
-template<> const vector2<double> vector2<double>::ZERO(0, 0);
+template<>
+const vector2<double> vector2<double>::ZERO;

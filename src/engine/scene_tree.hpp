@@ -11,7 +11,18 @@
 using namespace std;
 
 class abstract_game_object : virtual public tree_vertex {
+    bool __active = true;
+
     public:
+    
+    virtual bool active() {
+        return __active;
+    }
+
+    virtual void active(bool b) {
+        __active = b;
+    }
+    
     abstract_game_object(int const& index, shared_ptr<vector<int>> const& __adj,
     shared_ptr<int> const& parent)
         : vertex(index, __adj),
@@ -88,13 +99,36 @@ class scene_tree : virtual public abstract_tree {
         abstract_tree::remove_vertex(index);
     }
 
+    virtual void update() {
+        vector<int> to_update;
+
+        auto ef = [&to_update, this](shared_ptr<vertex> const& u,
+        shared_ptr<edge> const& last, vector<dfs_state> const& state,
+        vector<int> const& current_edge) {
+            abstract_game_object obj = get_object(u->index);
+
+            if (!obj.active()) return false;
+
+            to_update.push_back(obj.index);
+            return true;
+        };
+
+        auto lf = [](shared_ptr<vertex> const& u,
+        shared_ptr<edge> const& last, vector<dfs_state> const& state,
+        vector<int> const& current_edge) {};
+
+        dfs(0, ef, lf);
+
+        for (int i : to_update)
+            get_object(i).update();
+    }
+
     virtual ~scene_tree() override {}
 };
 
 class game_object : virtual public abstract_game_object {
     protected:
     scene_tree & __tree;
-    bool __active = true;
 
     public:
 
@@ -142,10 +176,6 @@ class game_object : virtual public abstract_game_object {
         if (!ptr)
             throw runtime_error("Child " + to_string(other) + " is not a game_object");
         return *ptr;
-    }
-
-    bool active() {
-        return __active;
     }
 
     //Do not instantiate directly, use game_object::create() instead
@@ -216,7 +246,7 @@ class world_object : virtual public game_object {
 
         game_object(tree), __position(position), __rotation(rotation), 
         __velocity(vector3<double>::ZERO), __angular_velocity(vector3<double>::ZERO),
-        __acceleration(vector3<double>::ZERO, vecto) {}
+        __acceleration(vector3<double>::ZERO), __angular_acceleration(vector3<double>::ZERO) {}
 
     static shared_ptr<world_object> create(scene_tree & tree, abstract_game_object & parent,
     vector3<double> position, vector3<double> rotation) {
@@ -227,7 +257,9 @@ class world_object : virtual public game_object {
     }
 
     void update() override {
-        __position += __velocity;
-        
+        __position += __velocity + 0.5 * __acceleration;
+        __rotation += __angular_velocity + 0.5 * __angular_acceleration;
+        __velocity += __acceleration;
+        __angular_velocity += __angular_acceleration;
     }
 };

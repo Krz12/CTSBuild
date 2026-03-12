@@ -266,7 +266,7 @@ class abstract_graph {
 
             //enter function
             bool enter = forward<bfs_enter>(enter_function)
-            (__vertices[index], __edges[last], state);
+            (v_ptr, e_ptr, state);
             if (!enter) continue;
 
             for (int i : get_vertex(index).edges()) {
