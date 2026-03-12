@@ -134,7 +134,7 @@ namespace sound_engine {
         ma_engine_listener_set_world_up(&g_engine, 0, up_x, up_y, up_z);
     }
 
-    void update() {
+    void update(double delta_time) {
         //set_listener_position
     }
 }

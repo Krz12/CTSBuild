@@ -15,5 +15,5 @@ namespace sound_engine {
     // Odtworzenie dźwięku o podanej nazwie (musi być wcześniej załadowana)
     // use3d = true => 3D sound (requires listener setup)
     std::shared_ptr<sound> play(const std::string& sound_name, sound_category category = sound_category::sfx, bool use3d = false);
-    void update();
+    void update(double delta_time);
 }

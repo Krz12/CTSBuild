@@ -29,6 +29,10 @@ class vector2 {
         
     }
 
+    vector2() : x(0), y(0) {
+
+    }
+
     double magnitude_squared() {
         return x * x + y * y;
     }

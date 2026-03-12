@@ -18,15 +18,19 @@ int main() {
 
     window main_window(window::DEFAULT_SIZE, "CTSBuild");
     main_window.vsync(false);
+    input_manager::init();
     sound_engine::init();
-    sound_engine::load_file("trump", "../assets/sound_trump.wav");
+    //sound_engine::load_file("trump", "../assets/sound_trump.wav");
     
-    auto trump = sound_engine::play("trump", sound_category::sfx, false);
+    //auto trump = sound_engine::play("trump", sound_category::sfx, false);
+    input_manager::map_action(action_type::move_forward, key::W);
     
     while (main_window.is_open()) {
         runtime_data::update();
+        double delta_time = runtime_data::delta_time();
         main_window.update();
-        sound_engine::update();
+        input_manager::update(delta_time);
+        sound_engine::update(delta_time);
     }
     
     sound_engine::uninit();
