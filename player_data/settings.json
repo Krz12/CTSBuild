@@ -1,0 +1,10 @@
+{
+  "actions": {
+    "move_backwards": "S",
+    "move_forward": "W",
+    "move_left": "A",
+    "move_right": "D",
+    "zoom_in": "0",
+    "zoom_out": "0"
+  }
+}

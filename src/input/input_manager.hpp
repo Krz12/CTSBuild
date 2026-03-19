@@ -1,7 +1,7 @@
 #pragma once
 #include "key_state.hpp"
 #include "mouse_state.hpp"
-#include "action.hpp"
+#include "action_type.hpp"
 
 namespace input_manager
 {

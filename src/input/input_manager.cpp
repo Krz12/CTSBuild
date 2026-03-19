@@ -2,7 +2,6 @@
 #include "key_state.hpp"
 #include "key.hpp"
 #include "mouse_state.hpp"
-#include "action.hpp"
 #include <vector>
 
 using namespace std;
@@ -11,13 +10,13 @@ namespace input_manager
 {
     bool __initialized = 0;
     vector<key_state> key_states;
-    vector<action> action_mappings;
+    vector<key> action_mappings;
     mouse_state mouse;
 
     void init()
     {
         key_states.resize(static_cast<size_t>(key::COUNT));
-        action_mappings.resize(static_cast<size_t>(action_type::last_action) + 1);
+        action_mappings.resize(static_cast<size_t>(action_type::COUNT));
         __initialized = 1;
     }
     void update(double delta_time)
@@ -51,19 +50,19 @@ namespace input_manager
         return mouse;
     }
 
-    const key_state &get_action_state(const action &a)
+    const key_state &get_action_state(const action_type &a)
     {
-        return key_states[static_cast<size_t>(a.get_trigger())];
+        return key_states[static_cast<size_t>(action_mappings[static_cast<size_t>(a)])];
     }
 
     void map_action(const action_type &a,const key &k)
     {
-        action_mappings[static_cast<size_t>(a)].set_trigger(k);
+        action_mappings[static_cast<size_t>(a)] = k;
     }
 
     const key get_action_mapping(const action_type &a)
     {
-        return action_mappings[static_cast<size_t>(a)].get_trigger();
+        return action_mappings[static_cast<size_t>(a)];
     }
 
     const bool is_initialized()

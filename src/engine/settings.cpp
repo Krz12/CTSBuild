@@ -1,5 +1,4 @@
 #include "settings.hpp"
-#include "input/action.hpp"
 #include "input/key.hpp"
 
 #include <fstream>
@@ -10,6 +9,9 @@
 #include "engine/logger.hpp"
 #include "input/input_manager.hpp"
 #include <stdexcept>
+#include "engine/file_utils.hpp"
+#include "logger.hpp"
+#include "audio/sound_categories.hpp"
 
 using nlohmann::json;
 using namespace std;
@@ -17,7 +19,7 @@ using namespace std;
 namespace settings
 {
 
-    const string path = "assets/settings.json";
+    const string path = file_utils::get_player_data_path() + "settings.json";
 static const unordered_map<string, action_type> action_from_string = {
     {"move_forward", action_type::move_forward},
     {"move_backwards", action_type::move_backwards},
@@ -34,6 +36,18 @@ static const unordered_map<action_type, string> action_to_string = {
     {action_type::move_right, "move_right"},
     {action_type::zoom_in, "zoom_in"},
     {action_type::zoom_out, "zoom_out"},
+};
+
+static const unordered_map<sound_category, string> sound_to_string = {
+    {sound_category::music, "music"},
+    {sound_category::sfx, "sfx"},
+    {sound_category::ui, "ui"},
+};
+
+static const unordered_map<string, sound_category> sound_from_string = {
+    {"music", sound_category::music},
+    {"sfx", sound_category::sfx, },
+    {"ui", sound_category::ui},
 };
 
 static key key_from_string(const string &str)
@@ -92,16 +106,37 @@ static string key_to_string(key k)
     return to_string(static_cast<int>(k));
 }
 
+bool create_default_mappings()
+{
+    logger::log("Creating default mappings!");
+    input_manager::map_action(action_type::move_forward, key::W);
+    input_manager::map_action(action_type::move_backwards, key::S);
+    input_manager::map_action(action_type::move_left, key::A);
+    input_manager::map_action(action_type::move_right, key::D);
+    return save_action_mappings();
+}
+
 bool load_action_mappings()
 {
     if(!input_manager::is_initialized()) throw runtime_error("Tried loading action mappings but input manager is not initialized!");
     ifstream in(path);
-    if (!in.is_open()) return false;
+    if (!in.is_open())
+    {
+        return create_default_mappings();
+    }
 
     json j;
-    in >> j;
+    try {
+        in >> j;
+    } catch (const json::exception &e) {
+        logger::logError("Failed to parse settings.json: " + string(e.what()));
+        return create_default_mappings();
+    }
 
-    if (!j.is_object() || !j.contains("actions")) return false;
+    if (!j.is_object() || !j.contains("actions"))
+    {
+        return create_default_mappings();
+    }
     const auto &actions = j["actions"];
     if (!actions.is_object()) return false;
 
@@ -117,7 +152,7 @@ bool load_action_mappings()
     return true;
 }
 
-bool save_action_mappings(const string &path)
+bool save_action_mappings()
 {
     json j;
     json actions = json::object();
@@ -136,6 +171,26 @@ bool save_action_mappings(const string &path)
 
     out << j.dump(2) << "\n";
     return true;
+}
+
+void save_sound_settings()
+{
+    json j;
+    json sound = json::object();
+
+    for (const auto &p : action_to_string) {
+        const auto &name = p.second;
+        action_type at = p.first;
+        key k = input_manager::get_action_mapping(at);
+        sound[name] = key_to_string(k);
+    }
+
+    j["sound"] = move(sound);
+
+    ofstream out(path);
+    if (!out.is_open()) return;
+
+    out << j.dump(2) << "\n";
 }
 
 void load_all_settings()
