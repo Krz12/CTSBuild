@@ -8,24 +8,9 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include "math/vertex.hpp"
 using namespace std;
 #define pii pair<int, int>
-
-class vertex {
-    public:
-    const int index;
-
-    protected:
-    shared_ptr<vector<int>> __adj;
-
-    public:
-    virtual vector<int> const& edges() const {
-        return *__adj;
-    }
-
-    vertex(int index, shared_ptr<vector<int>> const& adj)
-        : index(index), __adj(adj) {}
-};
 
 class edge {
     protected:
