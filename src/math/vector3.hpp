@@ -169,5 +169,3 @@ class vector3 {
         return v / scalar;
     }
 };
-
-template<> const vector3<double> vector3<double>::ZERO(0, 0, 0);

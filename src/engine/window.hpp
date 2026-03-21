@@ -111,5 +111,3 @@ class window {
         glfwSwapBuffers(__api_window);
     }
 };
-
-const vector2<int> window::DEFAULT_SIZE(1280, 720);

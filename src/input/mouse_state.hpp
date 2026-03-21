@@ -3,19 +3,19 @@
 #include <GLFW/glfw3.h>
 #include "math/vector2.hpp"
 
-namespace input_manager { void init(); void update(double delta_time); }
+namespace input_manager { void init(); void update(); }
 
 class mouse_state
 {
     // Only input_manager may write to mouse_state internals.
     friend void input_manager::init();
-    friend void input_manager::update(double delta_time);
+    friend void input_manager::update();
 
 private:
     vector2<int> position;
     vector2<int> position_delta;
 
-    void update(double delta_time)
+    void update()
     {
         GLFWwindow* win = glfwGetCurrentContext();
         if (!win) return;

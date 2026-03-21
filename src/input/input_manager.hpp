@@ -6,7 +6,7 @@
 namespace input_manager
 {
     void init();
-    void update(double delta_time);
+    void update();
     const key_state &get_key_state(const key &k);
     const key_state &get_action_state(const action_type &a);
     const mouse_state &get_mouse_state();

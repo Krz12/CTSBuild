@@ -92,11 +92,9 @@ class scene_tree : virtual public abstract_tree {
             to_update.push_back(obj.index);
             return true;
         };
-
         auto lf = [](shared_ptr<vertex> const& u,
         shared_ptr<edge> const& last, vector<dfs_state> const& state,
         vector<int> const& current_edge) {};
-
         dfs(0, ef, lf);
 
         for (int i : to_update)
@@ -194,16 +192,6 @@ class root_object : virtual public game_object {
         game_object(tree) {}
 };
 
-void scene_tree::add_root_object() {
-    if (size() != 0)
-        throw runtime_error("Root object already exists");
-    
-    shared_ptr<root_object> ptr = make_shared<root_object>(this);
-    int index = add_edgeless_vertex().index;
-    
-    __vertices[index] = ptr;
-}
-
 class world_object : virtual public game_object {
     protected:
     vector3<double> __position;
@@ -235,6 +223,55 @@ class world_object : virtual public game_object {
         tree.add_object(abs_ptr, parent.index);
         return ptr;
     }
+
+    void position(vector3<double> new_pos) {
+        __position = new_pos;
+    }
+
+    vector3<double> position() const {
+        return __position;
+    }
+
+    void velocity(vector3<double> new_vel) {
+        __velocity = new_vel;
+    }
+
+    vector3<double> velocity() const {
+        return __velocity;
+    }
+
+    void acceleration(vector3<double> new_acc) {
+        __acceleration = new_acc;
+    }
+
+    vector3<double> acceleration() const {
+        return __acceleration;
+    }
+
+    void rotation(vector3<double> new_rot) {
+        __rotation = new_rot;
+    }
+
+    vector3<double> rotation() const {
+        return __rotation;
+    }
+
+    void angular_velocity(vector3<double> new_ang_vel) {
+        __angular_velocity = new_ang_vel;
+    }
+
+    vector3<double> angular_velocity() const {
+        return __angular_velocity;
+    }
+
+    void angular_acceleration(vector3<double> new_ang_acc) {
+        __angular_acceleration = new_ang_acc;
+    }
+
+    vector3<double> angular_acceleration() const {
+        return __angular_acceleration;
+    }
+
 
     void update() override {
         __position += __velocity + 0.5 * __acceleration;

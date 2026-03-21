@@ -192,9 +192,7 @@ class abstract_graph {
 
                 state[index] = dfs_state::ENTERED;
             }
-
             current_edge[index]++;
-
             if (current_edge[index] == get_vertex(index).edges().size()) {
                 current_edge[index] = -1;
                 state[index] = dfs_state::LEAVING;

@@ -162,6 +162,3 @@ class vector2 {
         return v / scalar;
     }
 };
-
-template<>
-const vector2<double> vector2<double>::ZERO;

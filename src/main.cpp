@@ -5,13 +5,15 @@
 #include "audio/sound_library.hpp"
 #include "math/vector2.hpp"
 #include "input/input_manager.hpp"
+#include "game/main_menu_scene.hpp"
+#include "engine/scene_manager.hpp"
 using namespace std;
 
 int main() {
     file_utils::init();
-    scene_tree t;
+    /*scene_tree t;
     abstract_game_object & p = t.get_object(0);
-    game_object g = *game_object::create(t, p);
+    game_object g = *game_object::create(t, p);*/
 
     window main_window(window::DEFAULT_SIZE, "CTSBuild");
     main_window.vsync(false);
@@ -21,13 +23,15 @@ int main() {
     //sound_engine::load_file("trump", file_utils::get_assets_path()+"sound_trump.wav");
     //auto trump = sound_engine::play("trump", sound_category::sfx, false);
 
+    //Po wczytaniu całego silnika wczytujemy menu
+    scene_manager::init();
     
     while (main_window.is_open()) {
         runtime_data::update();
-        double delta_time = runtime_data::delta_time();
         main_window.update();
-        input_manager::update(delta_time);
-        sound_engine::update(delta_time);
+        input_manager::update();
+        sound_engine::update();
+        scene_manager::current_scene.get()->update();
     }
     
     sound_engine::uninit();

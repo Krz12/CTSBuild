@@ -1,3 +1,4 @@
+#pragma once
 #include "math/tree_vertex.hpp"
 #include "math/vector2.hpp"
 class abstract_game_object : virtual public tree_vertex {

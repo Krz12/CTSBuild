@@ -19,7 +19,7 @@ namespace input_manager
         action_mappings.resize(static_cast<size_t>(action_type::COUNT));
         __initialized = 1;
     }
-    void update(double delta_time)
+    void update()
     {
         GLFWwindow* win = glfwGetCurrentContext();
         if (!win) return;
@@ -35,10 +35,10 @@ namespace input_manager
                 pressed = glfwGetKey(win, glfw_key(k)) == GLFW_PRESS;
             }
 
-            key_states[i].update(pressed, delta_time);
+            key_states[i].update(pressed);
         }
 
-        mouse.update(delta_time);
+        mouse.update();
     }
     const key_state &get_key_state(const key &k)
     {
