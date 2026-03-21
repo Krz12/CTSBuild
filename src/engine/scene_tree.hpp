@@ -107,15 +107,16 @@ class scene_tree : virtual public abstract_tree {
         shared_ptr<edge> const& last, vector<dfs_state> const& state,
         vector<int> const& current_edge) {
             abstract_game_object obj = get_object(u->index);
-
             if (!obj.active()) return false;
-
-            to_update.push_back(obj.index);
             return true;
         };
-        auto lf = [](shared_ptr<vertex> const& u,
+
+        auto lf = [&to_update](shared_ptr<vertex> const& u,
         shared_ptr<edge> const& last, vector<dfs_state> const& state,
-        vector<int> const& current_edge) {};
+        vector<int> const& current_edge) {
+            to_update.push_back(u->index);
+        };
+
         dfs(0, ef, lf);
 
         for (int i : to_update)
