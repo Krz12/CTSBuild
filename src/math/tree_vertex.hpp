@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include "math/vertex.hpp"
+#include "math/graph.hpp"
 
 class tree_vertex : virtual public vertex {
     protected:

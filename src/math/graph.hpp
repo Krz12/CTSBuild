@@ -283,7 +283,7 @@ class abstract_graph {
     virtual int next_vertex_index() {
         if (__free_vertices.empty()) {
             __free_vertices.push(size());
-            __adj.push_back(nullptr);
+            __adj.push_back(make_shared<vector<int>>());
             __vertices.push_back(nullptr);
             __used_vertices_index.push_back(-1);
         }
@@ -307,9 +307,6 @@ class abstract_graph {
         int index = next_vertex_index();
         __free_vertices.pop();
 
-        shared_ptr<vector<int>> ptr = make_shared<vector<int>>();
-        __adj[index].swap(ptr);
-        __adj[index] = make_shared<vector<int>>();
         create_vertex(index, __vertices[index]);
 
         __used_vertices_index[index] = __used_vertices.size();
@@ -377,6 +374,10 @@ class abstract_graph {
 
         for (int i : adj)
             remove_edge(i);
+        
+        shared_ptr<vector<int>> ptr = make_shared<vector<int>>();
+        __adj[index].swap(ptr);
+        __adj[index] = make_shared<vector<int>>();
         
         __free_vertices.push(index);
         __vertices[index] = nullptr;

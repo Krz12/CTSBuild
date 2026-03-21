@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include "graph.hpp"
 #include "math/tree_vertex.hpp"
+#include "math/vertex.hpp"
 using namespace std;
 
 class abstract_tree : virtual public abstract_graph {
@@ -30,8 +31,7 @@ class abstract_tree : virtual public abstract_graph {
     }
 
     virtual tree_vertex& add_edgeless_vertex() {
-        int index = next_vertex_index();
-        abstract_graph::add_vertex();
+        int index = abstract_graph::add_vertex().index;
         return get_vertex(index);
     }
 
