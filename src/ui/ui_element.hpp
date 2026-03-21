@@ -1,5 +1,5 @@
-#include "engine/game_object.hpp"
 #include "ui/ui_anchor.hpp"
+#include "engine/scene_tree.hpp"
 
 class ui_element : game_object_2d {
     private:
