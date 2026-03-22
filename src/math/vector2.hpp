@@ -148,7 +148,7 @@ class vector2 {
         return v;
     }
 
-    friend vector2<T> operator*(T const& scalar, vector2<T> const& v) const {
+    friend vector2<T> operator*(T const& scalar, vector2<T> const& v) {
         return v * scalar;
     }
 
@@ -158,7 +158,7 @@ class vector2 {
         return v;
     }
 
-    friend vector2<T> operator/(T const& scalar, vector2<T> const& v) const {
+    friend vector2<T> operator/(T const& scalar, vector2<T> const& v) {
         return v / scalar;
     }
 };

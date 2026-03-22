@@ -278,23 +278,24 @@ class transform_3d {
         return __scale;
     }
 
-    transform_3d operator+(const transform_3d& other) const {
-        transform_3d result(vector3<double>::ZERO);
-        result.__position = this->__position + other.__position;
-        result.__rotation = this->__rotation + other.__rotation;
-        result.__scale = vector3<double>(
-            this->__scale.x * other.__scale.x,
-            this->__scale.y * other.__scale.y,
-            this->__scale.z * other.__scale.z
-        );
-        result.__velocity = this->__velocity + other.__velocity;
-        result.__acceleration = this->__acceleration + other.__acceleration;
-        result.__angular_velocity = this->__angular_velocity + other.__angular_velocity; //nwm czy to dobrze
-        result.__angular_acceleration = this->__angular_acceleration + other.__angular_acceleration;
+    void operator+=(const transform_3d& other) {
+        this->__position += other.__position;
+        this->__rotation += other.__rotation;
+        this->__scale *= other.__scale;
         
-        return result;
+        this->__velocity += other.__velocity;
+        this->__acceleration += other.__acceleration;
+
+        this->__rotation += other.__rotation;
+        this->__angular_velocity += other.__angular_velocity;
+        this-> __angular_acceleration += other.__angular_acceleration;
     }
 
+    transform_3d operator+(const transform_3d& other) const {
+        transform_3d result(*this);
+        result += other;
+        return result;
+    }
 };
 
 class game_object_3d : virtual public game_object {
@@ -315,8 +316,8 @@ class game_object_3d : virtual public game_object {
         game_object(tree), __transform(position), __global_transform(vector3<double>::ZERO) {}
 
     static shared_ptr<game_object_3d> create(scene_tree & tree, abstract_game_object & parent,
-    vector3<double> position, vector3<double> rotation) {
-        shared_ptr<game_object_3d> ptr = make_shared<game_object_3d>(&tree, position, rotation);
+    vector3<double> position) {
+        shared_ptr<game_object_3d> ptr = make_shared<game_object_3d>(&tree, position);
         shared_ptr<abstract_game_object> abs_ptr = dynamic_pointer_cast<abstract_game_object>(ptr);
         tree.add_object(abs_ptr, parent.index);
         return ptr;
@@ -330,11 +331,21 @@ class game_object_3d : virtual public game_object {
     }
 
     virtual void update_enter() override {
-        vector3<double> postion_delta((__transform.velocity() + 0.5 * __transform.acceleration()*delta_time()) * delta_time());
+        vector3<double> postion_delta(0.5 * __transform.acceleration() * delta_time());
+        postion_delta += __transform.velocity();
+        postion_delta *= delta_time();
+        vector3<double> acc_delta(__transform.acceleration() * delta_time());
+
         __transform.position(__transform.position() + postion_delta);
-        __transform.rotation(__transform.rotation() + __transform.angular_velocity() + 0.5 * __transform.angular_acceleration());
-        __transform.velocity(__transform.velocity() + __transform.acceleration());
-        __transform.angular_velocity(__transform.angular_velocity() + __transform.angular_acceleration());
+        __transform.velocity(__transform.velocity() + acc_delta);
+
+        vector3<double> rotation_delta(0.5 * __transform.angular_acceleration() * delta_time());
+        rotation_delta += __transform.angular_velocity();
+        rotation_delta *= delta_time();
+        vector3<double> ang_velocity_delta(__transform.angular_acceleration() * delta_time());
+
+        __transform.rotation(__transform.rotation() + rotation_delta);
+        __transform.angular_velocity(__transform.angular_velocity() + ang_velocity_delta);
 
         game_object& parent = parent_object();
         game_object_3d* parent_3d = dynamic_cast<game_object_3d*>(&parent); //slop żeby mieć parenta 3d (można dodac jeszcze z 2d ale po co)
@@ -368,14 +379,15 @@ public:
     void scale(vector2<double> new_scale) { __scale = new_scale; }
     vector2<double> scale() const { return __scale; }
     
+    void operator+=(const transform_2d& other) {
+        this->__position += other.__position;
+        this->__rotation += other.__rotation;
+        this->__scale *= other.__scale;
+    }
+
     transform_2d operator+(const transform_2d& other) const {
-        transform_2d result;
-        result.__position = this->__position + other.__position;
-        result.__rotation = this->__rotation + other.__rotation;
-        result.__scale = vector2<double>(
-            this->__scale.x * other.__scale.x,
-            this->__scale.y * other.__scale.y
-        );
+        transform_2d result(*this);
+        result += other;
         return result;
     }
 };
@@ -398,8 +410,8 @@ class game_object_2d : virtual public game_object {
         game_object(tree), __transform(position), __global_transform(vector2<double>::ZERO) {}
 
     static shared_ptr<game_object_2d> create(scene_tree & tree, abstract_game_object & parent,
-    vector3<double> position, vector3<double> rotation) {
-        shared_ptr<game_object_2d> ptr = make_shared<game_object_2d>(&tree, position, rotation);
+    vector2<double> position) {
+        shared_ptr<game_object_2d> ptr = make_shared<game_object_2d>(&tree, position);
         shared_ptr<abstract_game_object> abs_ptr = dynamic_pointer_cast<abstract_game_object>(ptr);
         tree.add_object(abs_ptr, parent.index);
         return ptr;
