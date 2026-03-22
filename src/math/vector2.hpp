@@ -67,25 +67,25 @@ class vector2 {
     }
 
     //vector, vector operations
-    vector2<T>& operator+=(vector2<T> const& other) const {
+    vector2<T>& operator+=(vector2<T> const& other) {
         x += other.x;
         y += other.y;
         return *this;
     }
 
-    vector2<T>& operator-=(vector2<T> const& other) const {
+    vector2<T>& operator-=(vector2<T> const& other) {
         x -= other.x;
         y -= other.y;
         return *this;
     }
 
-    vector2<T>& operator*=(vector2<T> const& other) const {
+    vector2<T>& operator*=(vector2<T> const& other) {
         x *= other.x;
         y *= other.y;
         return *this;
     }
 
-    vector2<T>& operator/=(vector2<T> const& other) const {
+    vector2<T>& operator/=(vector2<T> const& other) {
         x /= other.x;
         y /= other.y;
         return *this;
@@ -116,7 +116,7 @@ class vector2 {
     }
 
     //vector, double operations
-    vector2<T>& operator*=(T const& scalar) const {
+    vector2<T>& operator*=(T const& scalar) {
         x *= scalar;
         y *= scalar;
         __x_cache = x;
@@ -125,11 +125,11 @@ class vector2 {
         return *this;
     }
 
-    friend vector2<T>& operator*=(T const& scalar, vector2<T> & v) const {
+    friend vector2<T>& operator*=(T const& scalar, vector2<T> & v) {
         return v *= scalar;
     }
 
-    vector2<T>& operator/=(T const& scalar) const {
+    vector2<T>& operator/=(T const& scalar) {
         x /= scalar;
         y /= scalar;
         __x_cache = x;
@@ -138,7 +138,7 @@ class vector2 {
         return *this;
     }
 
-    friend vector2<T>& operator/=(T const& scalar, vector2<T> & v) const {
+    friend vector2<T>& operator/=(T const& scalar, vector2<T> & v) {
         return v /= scalar;
     }
 

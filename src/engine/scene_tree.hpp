@@ -9,7 +9,9 @@
 #include "math/tree.hpp"
 #include "math/vector3.hpp"
 #include "math/vector2.hpp"
+#include "engine/runtime_data.hpp"
 using namespace std;
+using namespace runtime_data;
 
 class abstract_game_object : virtual public tree_vertex {
     bool __active = true;
@@ -102,26 +104,28 @@ class scene_tree : virtual public abstract_tree {
     }
 
     virtual void update() {
-        vector<pair<int, bool>> to_update;
+        vector<pair<int, bool>> to_update; //first - index, second - czy wychodzi
 
         auto ef = [&to_update, this](shared_ptr<vertex> const& u,
         shared_ptr<edge> const& last, vector<dfs_state> const& state,
         vector<int> const& current_edge) {
             abstract_game_object obj = get_object(u->index);
             if (!obj.active()) return false;
+            to_update.push_back({u->index, false});
             return true;
         };
 
         auto lf = [&to_update](shared_ptr<vertex> const& u,
         shared_ptr<edge> const& last, vector<dfs_state> const& state,
         vector<int> const& current_edge) {
-            to_update.push_back(u->index);
+            to_update.push_back({u->index, true});
         };
 
         dfs(0, ef, lf);
 
-        for (int i : to_update)
-            get_object(i).update();
+        for (auto i : to_update)
+            if (i.second) get_object(i.first).update_leave();
+            else get_object(i.first).update_enter();
     }
 
     virtual ~scene_tree() override {}
@@ -325,8 +329,9 @@ class game_object_3d : virtual public game_object {
         return __transform;
     }
 
-    void update() override {
-        __transform.position(__transform.position()+ __transform.velocity() + 0.5 * __transform.acceleration());
+    virtual void update_enter() override {
+        vector3<double> postion_delta((__transform.velocity() + 0.5 * __transform.acceleration()*delta_time()) * delta_time());
+        __transform.position(__transform.position() + postion_delta);
         __transform.rotation(__transform.rotation() + __transform.angular_velocity() + 0.5 * __transform.angular_acceleration());
         __transform.velocity(__transform.velocity() + __transform.acceleration());
         __transform.angular_velocity(__transform.angular_velocity() + __transform.angular_acceleration());
@@ -407,7 +412,7 @@ class game_object_2d : virtual public game_object {
         return __transform;
     }
 
-    void update() override {
+    virtual void update_enter() override {
         game_object& parent = parent_object();
         game_object_2d* parent_2d = dynamic_cast<game_object_2d*>(&parent); //slop żeby mieć parenta 3d (można dodac jeszcze z 2d ale po co)
         if(parent_2d) {
