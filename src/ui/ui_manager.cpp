@@ -1,13 +1,20 @@
 #include "ui/ui_manager.hpp"
 
-const double ui_manager::scale()
+namespace ui_manager
 {
-    return __scale;
-}
+    double __scale = 1.0;
+    bool  __mouse_click_captured = 0,
+          __mouse_scroll_captured = 0;
 
-void ui_manager::update(const window &w)
-{
-    __mouse_click_captured = 0;
-    __mouse_scroll_captured = 0;
-    __scale = max(w.size().y, 1) / 1080.0;
-}
+    const double scale()
+    {
+        return __scale;
+    }
+
+    void update(const window &w)
+    {
+        __mouse_click_captured = 0;
+        __mouse_scroll_captured = 0;
+        __scale = w.size().y / 1080.0;
+    }
+} 

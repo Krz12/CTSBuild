@@ -8,15 +8,15 @@
 #include "game/main_menu_scene.hpp"
 #include "engine/scene_manager.hpp"
 using namespace std;
+using namespace window_manager;
 
 int main() {
     file_utils::init();
     /*scene_tree t;
     abstract_game_object & p = t.get_object(0);
     game_object g = *game_object::create(t, p);*/
-
-    window main_window(window::DEFAULT_SIZE, "CTSBuild");
-    main_window.vsync(false);
+    window_manager::init();
+    main_window()->vsync(false);
     input_manager::init();
     sound_engine::init();
     settings::load_all_settings();
@@ -26,12 +26,13 @@ int main() {
     //Po wczytaniu całego silnika wczytujemy menu
     scene_manager::init();
     
-    while (main_window.is_open()) {
+    while (main_window()->is_open()) {
         runtime_data::update();
-        main_window.update();
+        main_window()->update();
         input_manager::update();
         sound_engine::update();
         scene_manager::current_scene.get()->update();
+        scene_manager::current_scene.get()->render();
     }
     
     sound_engine::uninit();

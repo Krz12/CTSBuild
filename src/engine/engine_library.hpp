@@ -4,3 +4,4 @@
 #include "engine/file_utils.hpp"
 #include "engine/logger.hpp"
 #include "engine/settings.hpp"
+#include "engine/window_manager.hpp"

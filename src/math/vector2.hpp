@@ -66,6 +66,16 @@ class vector2 {
         __magnitude = 1;
     }
 
+    vector2<double> rotate(double rotation) const {
+        vector2<double> result;
+        double rad = rotation * M_PI / 180.0;
+        double cos_a = cos(rad);
+        double sin_a = sin(rad);
+        result.x = x * cos_a - y * sin_a;
+        result.y = x * sin_a + y * cos_a;
+        return result;
+    }
+
     //vector, vector operations
     vector2<T>& operator+=(vector2<T> const& other) {
         x += other.x;

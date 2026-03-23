@@ -65,6 +65,40 @@ class vector3 {
         __magnitude = 1;
     }
 
+    //Slop funckja
+    vector3<double> rotate(vector3<double> rotation) const {
+        double rx = rotation.x * M_PI / 180.0;
+        double ry = rotation.y * M_PI / 180.0;
+        double rz = rotation.z * M_PI / 180.0;
+        
+        vector3<double> result(*this);
+        
+        double cos_x = cos(rx);
+        double sin_x = sin(rx);
+        result = vector3<double>(
+            result.x,
+            result.y * cos_x - result.z * sin_x,
+            result.y * sin_x + result.z * cos_x
+        );
+        
+        double cos_y = cos(ry);
+        double sin_y = sin(ry);
+        result = vector3<double>(
+            result.x * cos_y + result.z * sin_y,
+            result.y,
+            -result.x * sin_y + result.z * cos_y
+        );
+        
+        double cos_z = cos(rz);
+        double sin_z = sin(rz);
+        result = vector3<double>(
+            result.x * cos_z - result.y * sin_z,
+            result.x * sin_z + result.y * cos_z,
+            result.z
+        );
+        return result;
+    }
+
     //vector, vector operations
     vector3<T>& operator+=(vector3<T> const& other) {
         x += other.x;
