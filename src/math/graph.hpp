@@ -160,6 +160,28 @@ class abstract_graph {
         return get_vertex(index);
     }
 
+    virtual int next_vertex_index() {
+        if (__free_vertices.empty()) {
+            __free_vertices.push(size());
+            __adj.push_back(make_shared<vector<int>>());
+            __vertices.push_back(nullptr);
+            __used_vertices_index.push_back(-1);
+        }
+
+        return __free_vertices.front();
+    }
+
+    virtual int next_edge_index() {
+        if (__free_edges.empty()) {
+            __free_edges.push(__edges.size());
+            __edges.push_back(nullptr);
+            __adj_index.push_back({-1, -1});
+            __used_edges_index.push_back(-1);
+        }
+
+        return __free_edges.front();
+    }
+
     //ALGORITHMS
 
     /*
@@ -293,28 +315,6 @@ class abstract_graph {
         edge& k = get_edge(a[i]);
         if (v == k.u) __adj_index[a[i]].first = i;
         else __adj_index[a[i]].second = i;
-    }
-
-    virtual int next_vertex_index() {
-        if (__free_vertices.empty()) {
-            __free_vertices.push(size());
-            __adj.push_back(make_shared<vector<int>>());
-            __vertices.push_back(nullptr);
-            __used_vertices_index.push_back(-1);
-        }
-
-        return __free_vertices.front();
-    }
-
-    virtual int next_edge_index() {
-        if (__free_edges.empty()) {
-            __free_edges.push(__edges.size());
-            __edges.push_back(nullptr);
-            __adj_index.push_back({-1, -1});
-            __used_edges_index.push_back(-1);
-        }
-
-        return __free_edges.front();
     }
 
     //Adds new a new vertex, if an unused index is available it will be used
