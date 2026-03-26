@@ -300,6 +300,39 @@ class abstract_graph {
         }
     }
 
+    virtual vector<int> dfs_order(int start) {
+        vector<int> order;
+
+        auto ef = [this, &order](shared_ptr<vertex> const& v_ptr,
+        shared_ptr<edge> const& e_ptr, vector<dfs_state> const& state,
+        vector<int> const& d) {
+            order.push_back(v_ptr->index);
+            return true;
+        };
+
+        auto lf = [](shared_ptr<vertex> const& v_ptr,
+        shared_ptr<edge> const& e_ptr, vector<dfs_state> const& state,
+        vector<int> const& d) {};
+
+        dfs(start, ef, lf);
+
+        return order;
+    }
+
+    virtual vector<int> bfs_order(int start) {
+        vector<int> order;
+
+        auto ef = [this, &order](shared_ptr<vertex> const& v_ptr,
+        shared_ptr<edge> const& e_ptr, vector<bfs_state> const& state) {
+            order.push_back(v_ptr->index);
+            return true;
+        };
+
+        bfs(start, ef);
+
+        return order;
+    }
+
     protected:
     virtual void create_vertex(int index, shared_ptr<vertex> & ptr) = 0;
 
