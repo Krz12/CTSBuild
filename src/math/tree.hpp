@@ -81,6 +81,27 @@ class abstract_tree : virtual public abstract_graph {
         return get_vertex(index);
     }
 
+    virtual vector<int> get_descendants(int index) {
+        int parent = get_vertex(index).parent();
+        vector<int> descendants;
+
+        auto ef = [this, &descendants, &parent](shared_ptr<vertex> const& v_ptr,
+        shared_ptr<edge> const& e_ptr, vector<dfs_state> const& state,
+        vector<int> const& d) {
+            if (e_ptr->index == parent) return false;
+            descendants.push_back(v_ptr->index);
+            return true;
+        };
+
+        auto lf = [](shared_ptr<vertex> const& v_ptr,
+        shared_ptr<edge> const& e_ptr, vector<dfs_state> const& state,
+        vector<int> const& d) {};
+
+        dfs(index, ef, lf);
+
+        return descendants;
+    }
+
     protected:
     virtual void set_parent(int index, int parent) {
         get_vertex(parent);
@@ -88,7 +109,7 @@ class abstract_tree : virtual public abstract_graph {
         int parent_e = get_vertex(index).parent();
         remove_edge(parent_e);
         
-        vector<int> indices = bfs_order(index);
+        vector<int> indices = get_descendants(index);
 
         for (int i : indices) {
             int p = get_vertex(i).parent();
@@ -102,7 +123,7 @@ class abstract_tree : virtual public abstract_graph {
         int parent = get_vertex(index).parent();
         remove_edge(parent);
 
-        vector<int> indices = bfs_order(index);
+        vector<int> indices = get_descendants(index);
 
         for (int i : indices) {
             tree_vertex const& u = get_vertex(i);
