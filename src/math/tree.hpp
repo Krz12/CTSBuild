@@ -102,6 +102,10 @@ class abstract_tree : virtual public abstract_graph {
         return descendants;
     }
 
+    virtual void sort_edges(int index, vector<int> const& permutation) override {
+        abstract_graph::sort_edges(index, permutation);
+    }
+
     protected:
     virtual void set_parent(int index, int parent) {
         get_vertex(parent);

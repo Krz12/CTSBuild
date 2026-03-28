@@ -94,7 +94,7 @@ class abstract_graph {
     }
     
     //Sorts the edges connected to a vertex with a permutation of the current order.
-    void sort_edges(int index, vector<int> const& permutation) {
+    virtual void sort_edges(int index, vector<int> const& permutation) {
         if (permutation.size() != edges().size())
             throw runtime_error("Given permutation is malformed");
 
@@ -481,6 +481,10 @@ class graph : virtual public abstract_graph {
     //Indices are reusable
     graph() {
         graph(0);
+    }
+
+    virtual void sort_edges(int index, vector<int> const& permutation) override {
+        abstract_graph::sort_edges(index, permutation);
     }
 
     virtual vertex& add_vertex() override {
