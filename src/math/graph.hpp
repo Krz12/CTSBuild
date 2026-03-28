@@ -92,6 +92,29 @@ class abstract_graph {
         if (!__edges[index])
             throw runtime_error("Edge of index " + to_string(index) + " does not currently exist");
     }
+    
+    //Sorts the edges connected to a vertex with a permutation of the current order.
+    void sort_edges(int index, vector<int> const& permutation) {
+        if (permutation.size() != edges().size())
+            throw runtime_error("Given permutation is malformed");
+
+        vertex& u = get_vertex(index);
+        vector<int> new_order(permutation.size());
+
+        for (int i = 0; i < permutation.size(); i++) {
+            int j = permutation[i]; 
+            int edge_index = u.edges()[i];
+
+            if (get_edge(edge_index).u == index)
+                __adj_index[edge_index].first = j;
+            else
+                __adj_index[edge_index].second = j;
+
+            new_order[i] = u.edges()[j];
+        }
+
+        *__adj[index] = new_order;
+    }
 
     public:
     //NOT the vertex count, i < size() may be unused
