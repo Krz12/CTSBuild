@@ -1,168 +1,120 @@
 #pragma once
 #include <glad/glad.h>
 #include <cstddef>
-#include <future>
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <functional>
+#include <unordered_set>
+#include <unordered_map>
+#include <vector>
 #include "math/graph.hpp"
 #include "math/vector3.hpp"
-#include "math/graph.hpp"
 #include "math/tree.hpp"
-#include "unordered_set"
-#include "unordered_map"
+#include "engine/component.hpp"
+#include "engine/entity.hpp"
+#include "systems/logic_system.hpp"
+#include "systems/testsystem.hpp"
+#include "systems/logic_system_register.hpp"
+
 using namespace std;
 
-struct entity_id {
-    entity_id(int set_idx) : index(set_idx) {}
-    uint32_t index;
-    uint32_t generation;
-};
-
-template<typename T>
-class component_container {
-public:
-    int add(T component, entity_id entity, tree &scene_tree) {
-        int depth; //ustaw na głębokość entity w drzewie
-        if (depth >= data.size()) data.resize(depth + 1);
-        
-        int index = data[depth].size();
-        data[depth].push_back(std::move(component));
-        
-        entity_to_depth[entity] = depth;
-        entity_to_index[entity] = index;
-        if (index_to_entity.size() <= depth) index_to_entity.resize(depth + 1);
-        if (index_to_entity[depth].size() <= index) index_to_entity[depth].resize(index + 1);
-        index_to_entity[depth][index] = entity;
-        
-        return index;
-    }
-    
-    void remove(entity_id entity) {
-        auto itDepth = entity_to_depth.find(entity);
-        if (itDepth == entity_to_depth.end()) return;
-        int depth = itDepth->second;
-        auto itIdx = entity_to_index.find(entity);
-        int idx = itIdx->second;
-        
-        auto& vec = data[depth];
-        int lastIdx = static_cast<int>(vec.size() - 1);
-        
-        if (idx != lastIdx) {
-            //przepisujemy ostatni element na puste miejsce
-            vec[idx] = move(vec[lastIdx]);
-            entity_id lastEntity = index_to_entity[depth][lastIdx];
-            entity_to_depth[lastEntity] = depth;
-            entity_to_index[lastEntity] = idx;
-            index_to_entity[depth][idx] = lastEntity;
-        }
-        
-        vec.pop_back();
-        index_to_entity[depth].pop_back();
-        
-        entity_to_depth.erase(entity);
-        entity_to_index.erase(entity);
-    }
-    
-    T* get(entity_id entity) {
-        auto itDepth = entity_to_depth.find(entity);
-        if (itDepth == entity_to_depth.end()) return nullptr;
-        int depth = itDepth->second;
-        auto itIdx = entity_to_index.find(entity);
-        int idx = itIdx->second;
-        if (depth >= data.size() || idx >= data[depth].size()) return nullptr;
-        return &data[depth][idx];
-    }
-
-    int max_depth() const {
-        return data.size()-1;
-    }
-    
-    void for_each_on_depth(int depth, function<void(T&, entity_id)> func) {
-        if (depth >= data.size()) return;
-        auto& vec = data[depth];
-        for (int i = 0; i < vec.size(); ++i) {
-            func(vec[i], index_to_entity[depth][i]);
-        }
-    }
-    
-private:
-    vector<vector<T>> data;
-    unordered_map<entity_id, int> entity_to_depth;
-    unordered_map<entity_id, uint32_t> entity_to_index;
-    vector<vector<entity_id>> index_to_entity;
-};
-
 class scene {
-    protected:
+private: 
+    unordered_set<unique_ptr<logic_system>> __logic_systems;
+protected:
     shared_ptr<tree> __tree = make_shared<tree>();
-    vector<entity_id> __entities;
+    vector<int> generations;
+    
     virtual void render_2d(const vector<int> &to_render) {
         glDisable(GL_DEPTH_TEST);
-        
     }
-
+    
     virtual void render_3d(const vector<int> &to_render) {
         glEnable(GL_DEPTH_TEST);
-        
+    }
+    
+public:
+    component_manager manager{*__tree};
+    scene() {
+        auto factories = logic_system_register::get_factories();
+        for (const auto& [name, factory] : factories) {
+            __logic_systems.insert(factory());
+        }
     }
 
-    public:
-    scene() {}
-    tree &get_tree() {
+    tree& get_tree() {
         return *__tree;
     }
 
-    entity_id create_entity(int parent = 0) {
-        __entities.push_back(entity_id(__tree->add_vertex(parent).index));
-        return __entities.back();
+    entity_id create_entity(entity_id parent = {0, 0}) {
+        int idx = __tree->add_vertex(parent.index).index;
+        if (idx >= generations.size()) generations.resize(idx + 1, 0);
+        entity_id eid{idx, generations[idx]};
+        return eid;
     }
 
     void remove_entity(entity_id id) {
-        //trzeba usunąć dzieci
-        vector<int> to_remove;
-        
-        auto ef = [&to_remove, this](shared_ptr<vertex> const& u,
-        shared_ptr<edge> const& last, vector<dfs_state> const& state,
-        vector<int> const& current_edge) {
-            return true;
-        };
+        if(id.index == 0) return;
+        vector<int> to_remove = __tree->get_descendants(id.index);
+        for (int idx : to_remove) {
+            entity_id eid{idx, generations[idx]};
+            manager.remove_all_components(eid);
+            __tree->remove_vertex(idx);
+            generations[idx]++;
+        }
+    }
 
-        auto lf = [&to_remove](shared_ptr<vertex> const& u,
-        shared_ptr<edge> const& last, vector<dfs_state> const& state,
-        vector<int> const& current_edge) {
-            to_remove.push_back(u->index);
-        };
+    //slop
+    void set_parent(entity_id entity, entity_id new_parent) {
+        if (entity.index == new_parent.index) return;
+        __tree->set_parent(entity.index, new_parent.index);
 
-        __tree->dfs(0, ef, lf);
+        // Pobierz wszystkie węzły w poddrzewie (włącznie z entity)
+        vector<int> subtree = __tree->get_descendants(entity.index);
+        for (int idx : subtree) {
+            entity_id eid{idx, generations[idx]};
+            int new_depth = __tree->get_vertex(idx).depth();
+            manager.move_components(eid, new_depth);
+        }
     }
 
     virtual void update() {
-        
+        for(auto &ls : __logic_systems) {
+            ls->update(manager);
+        }
     }
 
     virtual void render() {
-        //Zrób kolejka renderowania
-        vector<int> to_render;
-
-        auto ef = [&to_render, this](shared_ptr<vertex> const& u,
-        shared_ptr<edge> const& last, vector<dfs_state> const& state,
-        vector<int> const& current_edge) {
-            //abstract_game_object obj = __tree->get_object(u->index);
-            if (!obj.active()) return false;
+        vector<entity_id> to_render_3d;
+        vector<entity_id> to_render_2d;
+        auto enter_func = [&](shared_ptr<vertex> const& u,
+                            shared_ptr<edge> const& last,
+                            vector<dfs_state> const& state,
+                            vector<int> const& current_edge) -> bool {
+            entity_id eid{u->index, generations[u->index]};
+            /*if (manager.get_component<renderer_2d>(eid)) {
+                to_render_2d.push_back(eid);
+            }*/
             return true;
         };
 
-        auto lf = [&to_render](shared_ptr<vertex> const& u,
-        shared_ptr<edge> const& last, vector<dfs_state> const& state,
-        vector<int> const& current_edge) {
-            to_render.push_back(u->index);
+        auto leave_func = [&](shared_ptr<vertex> const& u,
+                            shared_ptr<edge> const& last,
+                            vector<dfs_state> const& state,
+                            vector<int> const& current_edge) {
+            entity_id eid{u->index, generations[u->index]};
+            /*if (manager.get_component<renderer_3d>(eid)) {
+                to_render_3d.push_back(eid);
+            }*/
         };
 
-        __tree->dfs(0, ef, lf);
+        __tree->dfs(0, enter_func, leave_func);
 
-        render_3d(to_render);
-        render_2d(to_render);
+        // Wywołaj funkcje renderowania z odpowiednimi listami
+        //render_3d(to_render_3d);   // kolejność post-order (dzieci przed rodzicem)
+        //render_2d(to_render_2d);   // kolejność pre-order (rodzic przed dziećmi)
+        
     }
 
     virtual ~scene() {}
