@@ -140,6 +140,17 @@ public:
         }
     }
 
+    void for_each_depth_top_down(function<void(int)> func) {
+        for(size_t i = 1; i < data.size(); ++i) {
+            func(static_cast<int>(i));
+        }
+    }
+    void for_each_depth_down_top(function<void(int)> func) {
+        for(int i = static_cast<int>(data.size()) - 1; i >= 0; --i) {
+            func(i);
+        }
+    }
+
 private:
     vector<vector<T>> data;
     tree& scene_tree;
@@ -186,7 +197,7 @@ private:
 
 class component_manager {
 public:
-    component_manager(tree& t) : scene_tree(t) {}
+    component_manager(tree& t) : __scene_tree(t) {}
 
     template<typename T>
     void add_component(entity_id entity, T comp) {
@@ -228,6 +239,24 @@ public:
     }
 
     template<typename T>
+    void for_each_depth_top_down(function<void(int)> func) {
+        size_t typeIdx = getTypeIndex<T>();
+        auto it = containers.find(typeIdx);
+        if (it == containers.end()) return;
+        auto* typed = dynamic_cast<ComponentContainerTyped<T>*>(it->second.get());
+        if (typed) typed->getImpl().for_each_depth_top_down(func);
+    }
+
+    template<typename T>
+    void for_each_depth_down_top(function<void(int)> func) {
+        size_t typeIdx = getTypeIndex<T>();
+        auto it = containers.find(typeIdx);
+        if (it == containers.end()) return;
+        auto* typed = dynamic_cast<ComponentContainerTyped<T>*>(it->second.get());
+        if (typed) typed->getImpl().for_each_depth_down_top(func);
+    }
+
+    template<typename T>
     void for_each_on_depth(int depth, function<void(T&, entity_id)> func) {
         size_t typeIdx = getTypeIndex<T>();
         auto it = containers.find(typeIdx);
@@ -242,6 +271,10 @@ public:
         }
     }
 
+    tree& scene_tree() {
+        return __scene_tree;
+    }
+
 private:
     template<typename T>
     static size_t getTypeIndex() {
@@ -253,7 +286,7 @@ private:
     ComponentContainerTyped<T>& getContainer(size_t typeIdx) {
         auto it = containers.find(typeIdx);
         if (it == containers.end()) {
-            auto newContainer = make_unique<ComponentContainerTyped<T>>(scene_tree);
+            auto newContainer = make_unique<ComponentContainerTyped<T>>(__scene_tree);
             auto& ref = *newContainer;
             containers[typeIdx] = move(newContainer);
             return ref;
@@ -263,5 +296,5 @@ private:
 
     static inline size_t nextTypeIndex = 0;
     unordered_map<size_t, unique_ptr<IComponentContainer>> containers;
-    tree& scene_tree;
+    tree& __scene_tree;
 };

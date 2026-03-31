@@ -16,21 +16,80 @@
 #include "systems/logic_system.hpp"
 #include "systems/testsystem.hpp"
 #include "systems/logic_system_register.hpp"
+#include "components/renderer_2d.hpp"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include "graphics/shader_2d.hpp"
 
 using namespace std;
 
 class scene {
 private: 
-    unordered_set<unique_ptr<logic_system>> __logic_systems;
+    vector<unique_ptr<logic_system>> __logic_systems;
 protected:
     shared_ptr<tree> __tree = make_shared<tree>();
     vector<int> generations;
+    shader_2d default_shader;
     
-    virtual void render_2d(const vector<int> &to_render) {
+    virtual void render_2d(const vector<entity_id> &to_render) {
         glDisable(GL_DEPTH_TEST);
+        //ai mówi że to trzeba raz na frame
+        /*glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glUseProgram(default_shader.program);
+        glUniformMatrix4fv(default_shader.uProjection, 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(default_shader.uModel, 1, GL_FALSE, glm::value_ptr(model));*/
+        for(const entity_id &e : to_render) {
+            renderer_2d* r = manager.get_component<renderer_2d>(e);
+            if(!r->generator) continue;;
+            if(r->dirty) {
+                GLuint newTex = r->generator(e, manager).opengl_texture_id;
+                if (r->__texture_id.opengl_texture_id != 0 && r->__texture_id.opengl_texture_id != newTex) {
+                    glDeleteTextures(1, &r->__texture_id.opengl_texture_id);
+                }
+                r->__texture_id.opengl_texture_id = newTex;
+                r->dirty = false;
+            }
+            if (r->__texture_id.opengl_texture_id == 0) continue;
+            //Narysuj teksturę
+            transform_2d* tc = manager.get_component<transform_2d>(e);
+            if(!tc) throw("Trying to render entity " + to_string(e.index) + " but there is no transform_2d!");
+            //slop alert
+            auto pos = tc->global.position();
+            auto scale = tc->global.scale();
+            double rot = tc->global.rotation();
+
+            glm::vec2 baseSize = {
+                r->base_size.x,
+                r->base_size.y
+            };
+
+            glm::vec2 finalSize = baseSize * glm::vec2(scale.x, scale.y);
+
+            glm::mat4 model = glm::mat4(1.0f);
+
+            // pozycja
+            model = glm::translate(model, glm::vec3(pos.x, pos.y, 0.0f));
+
+            // rotacja
+            model = glm::rotate(model, (float)rot, glm::vec3(0,0,1));
+
+            // pivot (środek domyślnie)
+            model = glm::translate(model, glm::vec3(-finalSize * 0.5f, 0.0f));
+
+            // skala → rozmiar
+            model = glm::scale(model, glm::vec3(finalSize, 1.0f));
+
+            //glUniformMatrix4fv(uModelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+            glBindTexture(GL_TEXTURE_2D, r->__texture_id.opengl_texture_id);
+
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+        }
     }
     
-    virtual void render_3d(const vector<int> &to_render) {
+    virtual void render_3d(const vector<entity_id> &to_render) {
         glEnable(GL_DEPTH_TEST);
     }
     
@@ -39,8 +98,12 @@ public:
     scene() {
         auto factories = logic_system_register::get_factories();
         for (const auto& [name, factory] : factories) {
-            __logic_systems.insert(factory());
+            __logic_systems.push_back(factory());
         }
+        //Shadery dla 2d
+
+        default_shader.uModel = glGetUniformLocation(default_shader.program, "uModel");
+        default_shader.uProjection = glGetUniformLocation(default_shader.program, "uProjection");
     }
 
     tree& get_tree() {
@@ -113,7 +176,7 @@ public:
 
         // Wywołaj funkcje renderowania z odpowiednimi listami
         //render_3d(to_render_3d);   // kolejność post-order (dzieci przed rodzicem)
-        //render_2d(to_render_2d);   // kolejność pre-order (rodzic przed dziećmi)
+        render_2d(to_render_2d);   // kolejność pre-order (rodzic przed dziećmi)
         
     }
 

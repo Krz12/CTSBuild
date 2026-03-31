@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if (DEBUG)
     set(CMAKE_BUILD_TYPE Debug)
-    set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DDEBUG -Wall ")
+    set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DDEBUG -Wall")
 else()
     set(CMAKE_BUILD_TYPE Release)
 endif()

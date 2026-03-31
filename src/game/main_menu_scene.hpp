@@ -1,6 +1,5 @@
 #pragma once
 #include "engine/scene.hpp"
-#include "ui/ui_manager.hpp"
 #include "engine/logger.hpp"
 #include "ui/ui_elments/ui_panel.hpp"
 #include "systems/testsystem.hpp"

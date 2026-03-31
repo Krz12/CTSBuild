@@ -1,9 +1,9 @@
-#include "ui/ui_alligment.hpp"
+/*#include "ui/ui_alligment.hpp"
 #include "math/vector2.hpp"
 #include "engine/window_manager.hpp"
-#include "ui/ui_manager.hpp"
+//#include "ui/ui_manager.hpp"
 
-/*class ui_element : public virtual game_object_2d {
+class ui_element : public virtual game_object_2d {
     private:
     vector2<double> calculate_transform(const vector2<double> &parent_size) { //Zależnie od pivota, anchora, zwraca lewy górny róg tak aby było na miejscu
         vector2<double> anchor_point;

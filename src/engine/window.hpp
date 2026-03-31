@@ -4,6 +4,10 @@
 #include "math/vector2.hpp"
 #include <stdexcept>
 #include <chrono>
+#include "GL/gl.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 using namespace std;
 
 class window {
@@ -35,6 +39,12 @@ class window {
             glfwTerminate();
             throw runtime_error("Failed to initialize GLAD");
         }
+        //Ustaw projekjce {0,0} - lewy górny
+        glm::mat4 projection = glm::ortho(
+            0.0f, (float)size.x,
+            (float)size.y, 0.0f,   // odwrócone Y
+            -1.0f, 1.0f
+        );
     }
 
     ~window() {

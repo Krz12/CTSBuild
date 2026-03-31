@@ -25,6 +25,17 @@ int main() {
 
     //Po wczytaniu całego silnika wczytujemy menu
     scene_manager::init();
+
+    float quadVertices[] = {
+    // pos    // uv
+    0.0f, 0.0f,  0.0f, 0.0f,
+    1.0f, 0.0f,  1.0f, 0.0f,
+    1.0f, 1.0f,  1.0f, 1.0f,
+
+    0.0f, 0.0f,  0.0f, 0.0f,
+    1.0f, 1.0f,  1.0f, 1.0f,
+    0.0f, 1.0f,  0.0f, 1.0f
+    };
     
     while (main_window()->is_open()) {
         runtime_data::update();
