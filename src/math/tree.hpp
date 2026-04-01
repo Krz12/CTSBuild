@@ -27,8 +27,13 @@ class tree_vertex : virtual public vertex {
     }
 
     tree_vertex(int const& index, shared_ptr<vector<int>> const& __adj,
-        shared_ptr<int> const& parent, shared_ptr<int> depth)
-        : vertex(index, __adj), __parent_edge(parent), __depth(depth) {}
+        shared_ptr<int> const& parent_edge,
+        shared_ptr<int> const& parent_vertex,
+        shared_ptr<int> depth)
+        : vertex(index, __adj),
+        __parent_edge(parent_edge),
+        __parent_vertex(parent_vertex),
+        __depth(depth) {}
 };
 
 class abstract_tree : virtual public abstract_graph {
@@ -37,7 +42,11 @@ class abstract_tree : virtual public abstract_graph {
     int __root;
 
     virtual void create_vertex(int index, shared_ptr<vertex> & ptr) override {
-        ptr = make_shared<tree_vertex>(index, __adj[index], __parent_edge[index], __depth[index]);
+        ptr = make_shared<tree_vertex>(index,
+            __adj[index],
+            __parent_edge[index],
+            __parent_vertex[index],
+            __depth[index]);
     }
 
     virtual void create_edge(int index, int u, int v, shared_ptr<edge> & ptr) override {
