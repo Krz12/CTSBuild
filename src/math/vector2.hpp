@@ -33,7 +33,7 @@ class vector2 {
 
     }
     
-    const static vector2<double> ZERO;
+    static inline const vector2<double> ZERO{0, 0};
 
     double magnitude_squared() {
         return x * x + y * y;

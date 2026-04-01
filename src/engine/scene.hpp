@@ -34,58 +34,9 @@ protected:
     
     virtual void render_2d(const vector<entity_id> &to_render) {
         glDisable(GL_DEPTH_TEST);
-        //ai mówi że to trzeba raz na frame
-        /*glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glUseProgram(default_shader.program);
-        glUniformMatrix4fv(default_shader.uProjection, 1, GL_FALSE, glm::value_ptr(projection));
-        glUniformMatrix4fv(default_shader.uModel, 1, GL_FALSE, glm::value_ptr(model));*/
         for(const entity_id &e : to_render) {
-            renderer_2d* r = manager.get_component<renderer_2d>(e);
-            if(!r->generator) continue;;
-            if(r->dirty) {
-                GLuint newTex = r->generator(e, manager).opengl_texture_id;
-                if (r->__texture_id.opengl_texture_id != 0 && r->__texture_id.opengl_texture_id != newTex) {
-                    glDeleteTextures(1, &r->__texture_id.opengl_texture_id);
-                }
-                r->__texture_id.opengl_texture_id = newTex;
-                r->dirty = false;
-            }
-            if (r->__texture_id.opengl_texture_id == 0) continue;
-            //Narysuj teksturę
-            transform_2d* tc = manager.get_component<transform_2d>(e);
-            if(!tc) throw("Trying to render entity " + to_string(e.index) + " but there is no transform_2d!");
-            //slop alert
-            auto pos = tc->global.position();
-            auto scale = tc->global.scale();
-            double rot = tc->global.rotation();
-
-            glm::vec2 baseSize = {
-                r->base_size.x,
-                r->base_size.y
-            };
-
-            glm::vec2 finalSize = baseSize * glm::vec2(scale.x, scale.y);
-
-            glm::mat4 model = glm::mat4(1.0f);
-
-            // pozycja
-            model = glm::translate(model, glm::vec3(pos.x, pos.y, 0.0f));
-
-            // rotacja
-            model = glm::rotate(model, (float)rot, glm::vec3(0,0,1));
-
-            // pivot (środek domyślnie)
-            model = glm::translate(model, glm::vec3(-finalSize * 0.5f, 0.0f));
-
-            // skala → rozmiar
-            model = glm::scale(model, glm::vec3(finalSize, 1.0f));
-
-            //glUniformMatrix4fv(uModelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
-            glBindTexture(GL_TEXTURE_2D, r->__texture_id.opengl_texture_id);
-
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+            //renderer_2d* r = manager.get_component<renderer_2d>(e);
+            
         }
     }
     
@@ -101,7 +52,6 @@ public:
             __logic_systems.push_back(factory());
         }
         //Shadery dla 2d
-
         default_shader.uModel = glGetUniformLocation(default_shader.program, "uModel");
         default_shader.uProjection = glGetUniformLocation(default_shader.program, "uProjection");
     }
@@ -128,17 +78,13 @@ public:
         }
     }
 
-    //slop
     void set_parent(entity_id entity, entity_id new_parent) {
         if (entity.index == new_parent.index) return;
         __tree->set_parent(entity.index, new_parent.index);
-
-        // Pobierz wszystkie węzły w poddrzewie (włącznie z entity)
         vector<int> subtree = __tree->get_descendants(entity.index);
         for (int idx : subtree) {
             entity_id eid{idx, generations[idx]};
-            int new_depth = __tree->get_vertex(idx).depth();
-            manager.move_components(eid, new_depth);
+            manager.update_entity_depth(eid);
         }
     }
 

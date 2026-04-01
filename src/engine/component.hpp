@@ -12,289 +12,181 @@
 #include "math/vector3.hpp"
 #include "math/tree.hpp"
 #include "engine/entity.hpp"
+#include <typeindex>
 
-struct MappingEntry {
-    int component_index = -1;
-    int generation = -1;
-    int depth = -1;
+namespace std {
+    template<>
+    struct hash<entity_id> {
+        size_t operator()(const entity_id& eid) const noexcept {
+            return ((size_t)eid.index << 32) | eid.generation;
+        }
+    };
+}
+
+class component_container_interface {
+    public:
+    virtual ~component_container_interface() = default;
+    virtual void add_component(const entity_id &eid) = 0;
+    virtual void remove_component(const entity_id &eid) = 0;
+    virtual void* get_component(const entity_id &eid) = 0;
+    virtual void update_entity_depth(const entity_id &eid) = 0;
+    virtual const bool has_component(const entity_id &eid) = 0;
+    
 };
 
-template<typename T>
-class component_container {
-public:
+template <typename T>
+class component_container : public component_container_interface {
+    private:
+    unordered_map<entity_id, int> entity_component_index;
+    unordered_map<entity_id, int> entity_depth;
+    vector<vector<T>> components;
+    vector<vector<entity_id>> entities; //depth,index
+
+    tree &scene_tree;
+    public:
     component_container(tree &set_tree) : scene_tree(set_tree) {}
-
-    int add(T component, entity_id entity) {
-        int depth = scene_tree.get_vertex(entity.index).depth();
-        if (depth >= (int)data.size()) data.resize(depth + 1);
-
-        int index = (int)data[depth].size();
-        data[depth].push_back(move(component));
-
-        if (entity.index >= (int)entity_to_index.size())
-            entity_to_index.resize(entity.index + 1);
-        entity_to_index[entity.index] = {index, entity.generation, depth};
-
-        if ((int)index_to_entity.size() <= depth) index_to_entity.resize(depth + 1);
-        if ((int)index_to_entity[depth].size() <= index) index_to_entity[depth].resize(index + 1);
-        index_to_entity[depth][index] = entity;
-
-        return index;
-    }
-
-    void remove(entity_id entity) {
-        if (entity.index >= (int)entity_to_index.size()) return;
-        auto& entry = entity_to_index[entity.index];
-        if (entry.generation != entity.generation) return; // nie istnieje
-
-        int depth = scene_tree.get_vertex(entity.index).depth();
-        int idx = entry.component_index;
-        if (idx == -1) return;
-
-        auto& vec = data[depth];
-        int lastIdx = (int)vec.size() - 1;
-
-        if (idx != lastIdx) {
-            // Przenieś ostatni element na miejsce usuwanego
-            vec[idx] = move(vec[lastIdx]);
-            entity_id lastEntity = index_to_entity[depth][lastIdx];
-            // Zaktualizuj mapowanie dla ostatniej encji
-            if (lastEntity.index >= (int)entity_to_index.size())
-                entity_to_index.resize(lastEntity.index + 1);
-            entity_to_index[lastEntity.index] = {idx, lastEntity.generation, depth};
-            index_to_entity[depth][idx] = lastEntity;
+    
+    void add_component(const entity_id &eid) override {
+        if(has_component(eid)) return;
+        int depth = scene_tree.get_vertex(eid.index).depth();
+        if(depth > components.size()) {
+            components.resize(depth+1);
+            entities.resize(depth+1);
         }
-
-        vec.pop_back();
-        index_to_entity[depth].pop_back();
-
-        entry.component_index = -1;
-        // generation może pozostać, ale lepiej ustawić na -1 (oznacza wolny slot)
-        entry.generation = -1;
+        components[depth].push_back(T());
+        entities[depth].push_back(eid);
+        entity_component_index[eid] = (int)components[depth].size()-1;
+        entity_depth[eid] = depth;
     }
 
-    //slop
-    void move_to_depth(entity_id entity, int new_depth) {
-        if (entity.index >= (int)entity_to_index.size()) return;
-        auto& entry = entity_to_index[entity.index];
-        if (entry.generation != entity.generation) return;
-        int old_depth = entry.depth;
-        if (old_depth == new_depth) return;
-        int idx = entry.component_index;
-        if (idx == -1) return;
-
-        // Wyjmij komponent ze starego wektora
-        auto& old_vec = data[old_depth];
-        int lastIdx = (int)old_vec.size() - 1;
-        T component = std::move(old_vec[idx]);
-
-        // Swap & pop w starym wektorze
-        if (idx != lastIdx) {
-            old_vec[idx] = std::move(old_vec[lastIdx]);
-            entity_id lastEntity = index_to_entity[old_depth][lastIdx];
-            if (lastEntity.index >= (int)entity_to_index.size())
-                entity_to_index.resize(lastEntity.index + 1);
-            entity_to_index[lastEntity.index] = {idx, lastEntity.generation, old_depth};
-            index_to_entity[old_depth][idx] = lastEntity;
+    void remove_component(const entity_id &eid) override {
+        if(!has_component(eid)) return;
+        int depth = scene_tree.get_vertex(eid.index).depth();
+        int idx = entity_component_index[eid];
+        if(idx != components[depth].size()-1) {
+            swap(components[depth][idx], components[depth][components[depth].size()-1]);
+            swap(entities[depth][idx], entities[depth][entities[depth].size()-1]);
+            entity_component_index[entities[depth][idx]] = idx;
         }
-        old_vec.pop_back();
-        index_to_entity[old_depth].pop_back();
-
-        // Dodaj komponent na nową głębokość
-        if (new_depth >= (int)data.size()) data.resize(new_depth + 1);
-        int new_index = (int)data[new_depth].size();
-        data[new_depth].push_back(std::move(component));
-
-        if (new_depth >= (int)index_to_entity.size()) index_to_entity.resize(new_depth + 1);
-        if (new_index >= (int)index_to_entity[new_depth].size()) index_to_entity[new_depth].resize(new_index + 1);
-        index_to_entity[new_depth][new_index] = entity;
-
-        // Aktualizuj mapowanie dla tej encji
-        entry.component_index = new_index;
-        entry.depth = new_depth;
+        components[depth].pop_back();
+        entities[depth].pop_back();
+        entity_component_index.erase(eid);
+        entity_depth.erase(eid);
     }
 
-    T* get(entity_id entity) {
-        if (entity.index >= (int)entity_to_index.size())
-            return nullptr;
-        auto& entry = entity_to_index[entity.index];
-        if (entry.generation != entity.generation)
-            return nullptr;      // to nie ta sama encja
-        int idx = entry.component_index;
-        if (idx == -1) return nullptr;
-        int depth = scene_tree.get_vertex(entity.index).depth();
-        if (depth >= (int)data.size() || idx >= (int)data[depth].size())
-            return nullptr;
-        return &data[depth][idx];
+    void update_entity_depth(const entity_id &eid) override {
+        if(!has_component(eid)) return;
+        int new_depth = scene_tree.get_vertex(eid.index).depth();
+        if(entity_depth[eid] == new_depth) return;
+        T temp = move(components[entity_depth[eid]][entity_component_index[eid]]);
+        remove_component(eid);
+        add_component(eid);
+        components[new_depth][entity_component_index[eid]] = move(temp);
     }
 
-    int max_depth() const {
-        return static_cast<int>(data.size()) - 1;
+    void* get_component(const entity_id &eid) override {
+        if (!has_component(eid)) return nullptr;
+        return static_cast<void*>(&components[entity_depth[eid]][entity_component_index[eid]]);
     }
 
+    const bool has_component(const entity_id &eid) override {
+        return (entity_component_index.find(eid) == entity_component_index.end())? 0 : 1;
+    }
+    
     void for_each_on_depth(int depth, function<void(T&, entity_id)> func) {
-        if (depth >= static_cast<int>(data.size())) return;
-        auto& vec = data[depth];
+        if (depth >= (int)components.size()) return;
+        auto& vec = components[depth];
+        auto& ent = entities[depth];
         for (size_t i = 0; i < vec.size(); ++i) {
-            func(vec[i], index_to_entity[depth][i]);
+            func(vec[i], ent[i]);
         }
     }
 
-    void for_each_depth_top_down(function<void(int)> func) {
-        for(size_t i = 1; i < data.size(); ++i) {
-            func(static_cast<int>(i));
-        }
-    }
-    void for_each_depth_down_top(function<void(int)> func) {
-        for(int i = static_cast<int>(data.size()) - 1; i >= 0; --i) {
-            func(i);
+    void for_each_depth_top_down(function<void(int depth)> func) {
+        for(size_t d = 0; d < components.size(); d++) {
+            func(d);
         }
     }
 
-private:
-    vector<vector<T>> data;
-    tree& scene_tree;
-    vector<MappingEntry> entity_to_index;
-    vector<vector<entity_id>> index_to_entity;
-};
-
-class IComponentContainer {
-public:
-    virtual ~IComponentContainer() = default;
-    virtual void remove(entity_id entity) = 0;
-    virtual void* get(entity_id entity) = 0;
-    virtual void move_to_depth(entity_id entity, int new_depth) = 0;
-};
-
-template<typename T>
-class ComponentContainerTyped : public IComponentContainer {
-public:
-    ComponentContainerTyped(tree& t) : impl(t) {}
-
-    void add(T comp, entity_id entity) {
-        impl.add(move(comp), entity);
+    void for_each_depth_down_top(function<void(T&, entity_id, int depth)> func) {
+        for(size_t d = components.size()-1; d > 0; --d) {
+            func(d);
+        }
     }
 
-    void remove(entity_id entity) override {
-        impl.remove(entity);
-    }
-
-    void* get(entity_id entity) override {
-        return impl.get(entity);
-    }
-
-    void move_to_depth(entity_id entity, int new_depth) override {
-        impl.move_to_depth(entity, new_depth);
-    }
-
-    component_container<T>& getImpl() {
-        return impl;
-    }
-
-private:
-    component_container<T> impl;
 };
 
 class component_manager {
-public:
-    component_manager(tree& t) : __scene_tree(t) {}
-
-    template<typename T>
-    void add_component(entity_id entity, T comp) {
-        size_t typeIdx = getTypeIndex<T>();
-        auto& container = getContainer<T>(typeIdx);
-        container.add(move(comp), entity);
+    private:
+    tree &__scene_tree;
+    unordered_map<type_index, unique_ptr<component_container_interface>> containers;
+    template <typename T>
+    component_container<T>& get_container() {
+        auto it = containers.find(type_index(typeid(T)));
+        if (it == containers.end()) {
+            auto new_container = make_unique<component_container<T>>(__scene_tree);
+            auto& ref = *new_container;
+            containers[type_index(typeid(T))] = move(new_container);
+            return ref;
+        }
+        return static_cast<component_container<T>&>(*it->second);
     }
 
-    template<typename T> requires std::is_default_constructible_v<T>
-    void add_component(entity_id entity) {
-        size_t typeIdx = getTypeIndex<T>();
-        auto& container = getContainer<T>(typeIdx);
-        container.add(move(T{}), entity);
+    public:
+    component_manager(tree &set_tree) : __scene_tree(set_tree) {}
+
+    const tree &scene_tree() {
+        return __scene_tree;
+    }
+    
+    template <typename T>
+    void add_component(const entity_id &eid) {
+        get_container<T>().add_component(eid);
     }
 
-    template<typename T>
-    void remove_component(entity_id entity) {
-        size_t typeIdx = getTypeIndex<T>();
-        auto it = containers.find(typeIdx);
-        if (it != containers.end()) {
-            it->second->remove(entity);
+    template <typename T>
+    void remove_component(const entity_id &eid) {
+        get_container<T>().remove_component(eid);
+    }
+
+    template <typename T>
+    T& get_component(const entity_id &eid) {
+        auto* ptr = static_cast<T*>(get_container<T>().get_component(eid));
+        if(!ptr) throw("Tried to get component which entity doesn't have");
+        return *ptr;
+    }
+
+    template <typename T>
+    const bool has_component(const entity_id &eid) {
+        return get_container<T>().has_component(eid);
+    }
+
+    //będzie trzeba wywołać po zmianie parenta
+    void update_entity_depth(const entity_id &eid) {
+        //zrobimy dla każdego komponentu, można ewentualnie dla każdego trzymać liste komponentów
+        for(auto& p : containers) {
+            p.second.get()->update_entity_depth(eid);
         }
     }
 
-    void move_components(entity_id entity, int new_depth) {
-        for (auto& [typeIdx, container] : containers) {
-            container->move_to_depth(entity, new_depth);
+    void remove_all_components(const entity_id &eid) {
+        for(auto& p : containers) {
+            p.second.get()->remove_component(eid);
         }
-    }
-
-    template<typename T>
-    T* get_component(entity_id entity) {
-        size_t typeIdx = getTypeIndex<T>();
-        auto it = containers.find(typeIdx);
-        if (it == containers.end()) return nullptr;
-        auto* typed = dynamic_cast<ComponentContainerTyped<T>*>(it->second.get());
-        if (!typed) return nullptr;
-        return static_cast<T*>(typed->get(entity));
-    }
-
-    template<typename T>
-    void for_each_depth_top_down(function<void(int)> func) {
-        size_t typeIdx = getTypeIndex<T>();
-        auto it = containers.find(typeIdx);
-        if (it == containers.end()) return;
-        auto* typed = dynamic_cast<ComponentContainerTyped<T>*>(it->second.get());
-        if (typed) typed->getImpl().for_each_depth_top_down(func);
-    }
-
-    template<typename T>
-    void for_each_depth_down_top(function<void(int)> func) {
-        size_t typeIdx = getTypeIndex<T>();
-        auto it = containers.find(typeIdx);
-        if (it == containers.end()) return;
-        auto* typed = dynamic_cast<ComponentContainerTyped<T>*>(it->second.get());
-        if (typed) typed->getImpl().for_each_depth_down_top(func);
     }
 
     template<typename T>
     void for_each_on_depth(int depth, function<void(T&, entity_id)> func) {
-        size_t typeIdx = getTypeIndex<T>();
-        auto it = containers.find(typeIdx);
-        if (it == containers.end()) return;
-        auto* typed = dynamic_cast<ComponentContainerTyped<T>*>(it->second.get());
-        if (typed) typed->getImpl().for_each_on_depth(depth, func);
-    }
-
-    void remove_all_components(entity_id entity) {
-        for (auto& [idx, container] : containers) {
-            container->remove(entity);
-        }
-    }
-
-    tree& scene_tree() {
-        return __scene_tree;
-    }
-
-private:
-    template<typename T>
-    static size_t getTypeIndex() {
-        static size_t idx = nextTypeIndex++;
-        return idx;
+        get_container<T>().for_each_on_depth(depth, func);
     }
 
     template<typename T>
-    ComponentContainerTyped<T>& getContainer(size_t typeIdx) {
-        auto it = containers.find(typeIdx);
-        if (it == containers.end()) {
-            auto newContainer = make_unique<ComponentContainerTyped<T>>(__scene_tree);
-            auto& ref = *newContainer;
-            containers[typeIdx] = move(newContainer);
-            return ref;
-        }
-        return *static_cast<ComponentContainerTyped<T>*>(it->second.get());
+    void for_each_depth_top_down(function<void(int depth)> func) {
+        get_container<T>().for_each_depth_top_down(func);
     }
 
-    static inline size_t nextTypeIndex = 0;
-    unordered_map<size_t, unique_ptr<IComponentContainer>> containers;
-    tree& __scene_tree;
+    template<typename T>
+    void for_each_depth_down_top(function<void(int depth)> func) {
+        get_container<T>().for_each_depth_down_top(func);
+    }
 };
