@@ -9,12 +9,17 @@ using namespace std;
 
 class tree_vertex : virtual public vertex {
     protected:
-    const shared_ptr<int> __parent; //index of edge, not vertex
+    const shared_ptr<int> __parent_vertex;
+    const shared_ptr<int> __parent_edge;
     const shared_ptr<int> __depth;
 
     public:
     inline virtual int parent() const {
-        return *__parent;
+        return *__parent_vertex;
+    }
+
+    inline virtual int parent_edge() const {
+        return *__parent_edge;
     }
 
     inline virtual int depth() const {
@@ -23,16 +28,16 @@ class tree_vertex : virtual public vertex {
 
     tree_vertex(int const& index, shared_ptr<vector<int>> const& __adj,
         shared_ptr<int> const& parent, shared_ptr<int> depth)
-        : vertex(index, __adj), __parent(parent), __depth(depth) {}
+        : vertex(index, __adj), __parent_edge(parent), __depth(depth) {}
 };
 
 class abstract_tree : virtual public abstract_graph {
     protected:
-    vector<shared_ptr<int>> __parent, __depth;
+    vector<shared_ptr<int>> __parent_edge, __parent_vertex, __depth;
     int __root;
 
     virtual void create_vertex(int index, shared_ptr<vertex> & ptr) override {
-        ptr = make_shared<tree_vertex>(index, __adj[index], __parent[index], __depth[index]);
+        ptr = make_shared<tree_vertex>(index, __adj[index], __parent_edge[index], __depth[index]);
     }
 
     virtual void create_edge(int index, int u, int v, shared_ptr<edge> & ptr) override {
@@ -42,8 +47,10 @@ class abstract_tree : virtual public abstract_graph {
     virtual int next_vertex_index() override {
         int index = abstract_graph::next_vertex_index();
 
-        while (__parent.size() <= index)
-            __parent.push_back(make_shared<int>(-1));
+        while (__parent_edge.size() <= index)
+            __parent_edge.push_back(make_shared<int>(-1));
+        while (__parent_vertex.size() <= index)
+            __parent_vertex.push_back(make_shared<int>(-1));
         while (__depth.size() <= index)
             __depth.push_back(make_shared<int>(-1));
 
@@ -82,7 +89,7 @@ class abstract_tree : virtual public abstract_graph {
     }
 
     virtual vector<int> get_descendants(int index) {
-        int parent = get_vertex(index).parent();
+        int parent = get_vertex(index).parent_edge();
         vector<int> descendants;
 
         auto ef = [this, &descendants, &parent](shared_ptr<vertex> const& v_ptr,
@@ -110,13 +117,16 @@ class abstract_tree : virtual public abstract_graph {
     virtual void set_parent(int index, int parent) {
         get_vertex(parent);
 
-        int parent_e = get_vertex(index).parent();
+        int parent_e = get_vertex(index).parent_edge();
         remove_edge(parent_e);
+
+        *__parent_edge[index] = add_edge(parent, index).index;
+        *__parent_vertex[index] = parent;
         
         vector<int> indices = get_descendants(index);
 
         for (int i : indices) {
-            int p = get_vertex(i).parent();
+            int p = get_vertex(i).parent_edge();
             p = other_vertex(get_edge(p), i);
             *__depth[i] = *__depth[p] + 1;
         }
@@ -124,15 +134,15 @@ class abstract_tree : virtual public abstract_graph {
 
     //Removes all descendants as well, set new parent first if not intended
     virtual void remove_vertex(int index) override {
-        int parent = get_vertex(index).parent();
+        int parent = get_vertex(index).parent_edge();
         remove_edge(parent);
 
         vector<int> indices = get_descendants(index);
 
         for (int i : indices) {
             tree_vertex const& u = get_vertex(i);
-            if (u.parent() == -1) continue;
-            remove_edge(u.parent());
+            if (u.parent_edge() == -1) continue;
+            remove_edge(u.parent_edge());
         }
 
         for (int i : indices)
@@ -148,7 +158,8 @@ class abstract_tree : virtual public abstract_graph {
         abstract_graph::add_vertex();
 
         edge& e = add_edge(parent, index);
-        *__parent[index] = e.index;
+        *__parent_edge[index] = e.index;
+        *__parent_vertex[index] = parent;
         *__depth[index] = *__depth[parent] + 1;
 
         return get_vertex(index);
@@ -200,7 +211,7 @@ class tree : virtual public abstract_tree {
             if (!e_ptr) return true;
 
             edge& e = add_edge(other_vertex(*e_ptr, v_ptr->index), v_ptr->index);
-            *__parent[v_ptr->index] = e.index;
+            *__parent_edge[v_ptr->index] = e.index;
 
             int pd = get_vertex(other_vertex(*e_ptr, v_ptr->index)).depth();
             *__depth[v_ptr->index] = pd;
