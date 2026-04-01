@@ -12,7 +12,10 @@ class main_menu_scene : public scene {
         //auto panel = ui_panel::create();
         //panel->anchor = ui_anchor::center;
         //panel->design_size = vector2<double>(400, 100);
+        entity_id father = create_entity();
+        manager.add_component<test_comp>(father);
         entity_id test_ent = create_entity();
         manager.add_component<test_comp>(test_ent);
+        set_parent(test_ent, father);
     }
 };

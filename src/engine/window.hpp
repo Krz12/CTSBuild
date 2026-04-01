@@ -25,7 +25,7 @@ class window {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // lub 4, jeśli używasz OpenGL 4.x
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        __api_window = glfwCreateWindow(size.x, size.y, title.c_str(), nullptr, nullptr);
+        __api_window = glfwCreateWindow(size.x, size.y, title.c_str(), NULL, NULL);
         
         if (!__api_window) {
             glfwTerminate();

@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <type_traits>
 #include "graph.hpp"
+#include <iostream>
 using namespace std;
 
 class tree_vertex : virtual public vertex {
@@ -100,7 +101,7 @@ class abstract_tree : virtual public abstract_graph {
     virtual vector<int> get_descendants(int index) {
         int parent = get_vertex(index).parent_edge();
         vector<int> descendants;
-
+        
         auto ef = [this, &descendants, &parent](shared_ptr<vertex> const& v_ptr,
         shared_ptr<edge> const& e_ptr, vector<dfs_state> const& state,
         vector<int> const& d) {
@@ -112,7 +113,6 @@ class abstract_tree : virtual public abstract_graph {
         auto lf = [](shared_ptr<vertex> const& v_ptr,
         shared_ptr<edge> const& e_ptr, vector<dfs_state> const& state,
         vector<int> const& d) {};
-
         dfs(index, ef, lf);
 
         return descendants;
@@ -131,7 +131,6 @@ class abstract_tree : virtual public abstract_graph {
 
         *__parent_edge[index] = add_edge(parent, index).index;
         *__parent_vertex[index] = parent;
-        
         vector<int> indices = get_descendants(index);
 
         for (int i : indices) {
