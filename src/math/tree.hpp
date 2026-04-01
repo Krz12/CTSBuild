@@ -99,13 +99,13 @@ class abstract_tree : virtual public abstract_graph {
     }
 
     virtual vector<int> get_descendants(int index) {
-        int parent = get_vertex(index).parent_edge();
+        int parent = get_vertex(index).parent();
         vector<int> descendants;
         
         auto ef = [this, &descendants, &parent](shared_ptr<vertex> const& v_ptr,
         shared_ptr<edge> const& e_ptr, vector<dfs_state> const& state,
         vector<int> const& d) {
-            if (e_ptr->index == parent) return false;
+            if (v_ptr->index == parent) return false;
             descendants.push_back(v_ptr->index);
             return true;
         };
@@ -113,6 +113,7 @@ class abstract_tree : virtual public abstract_graph {
         auto lf = [](shared_ptr<vertex> const& v_ptr,
         shared_ptr<edge> const& e_ptr, vector<dfs_state> const& state,
         vector<int> const& d) {};
+
         dfs(index, ef, lf);
 
         return descendants;
