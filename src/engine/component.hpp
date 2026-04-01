@@ -49,7 +49,8 @@ class component_container : public component_container_interface {
     void add_component(const entity_id &eid) override {
         if(has_component(eid)) return;
         int depth = scene_tree.get_vertex(eid.index).depth();
-        if(depth > components.size()) {
+        cerr << "depth: " << depth << "\n";
+        if(depth >= components.size()) {
             components.resize(depth+1);
             entities.resize(depth+1);
         }
@@ -61,7 +62,7 @@ class component_container : public component_container_interface {
 
     void remove_component(const entity_id &eid) override {
         if(!has_component(eid)) return;
-        int depth = scene_tree.get_vertex(eid.index).depth();
+        int depth = entity_depth[eid];
         int idx = entity_component_index[eid];
         if(idx != components[depth].size()-1) {
             swap(components[depth][idx], components[depth][components[depth].size()-1]);
@@ -80,6 +81,7 @@ class component_container : public component_container_interface {
         if(entity_depth[eid] == new_depth) return;
         T temp = move(components[entity_depth[eid]][entity_component_index[eid]]);
         remove_component(eid);
+        entity_depth[eid] = new_depth;
         add_component(eid);
         components[new_depth][entity_component_index[eid]] = move(temp);
     }
