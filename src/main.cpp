@@ -26,24 +26,20 @@ int main() {
     //Po wczytaniu całego silnika wczytujemy menu
     scene_manager::init();
 
-    float quadVertices[] = {
-    // pos    // uv
-    0.0f, 0.0f,  0.0f, 0.0f,
-    1.0f, 0.0f,  1.0f, 0.0f,
-    1.0f, 1.0f,  1.0f, 1.0f,
-
-    0.0f, 0.0f,  0.0f, 0.0f,
-    1.0f, 1.0f,  1.0f, 1.0f,
-    0.0f, 1.0f,  0.0f, 1.0f
+    GLfloat vertecis[] = {
+        -0.5f, -0.5f, (float)sqrt(3) / 3, 0.0f,
+        0.5f, -0.5f, (float)sqrt(3) / 3, 0.0f,
+        0.0f, 0.5f, (float)sqrt(3) * 2 / 3, 0.0f
     };
     
     while (main_window()->is_open()) {
         runtime_data::update();
-        main_window()->update();
+        main_window()->start_frame();
         input_manager::update();
         sound_engine::update();
         scene_manager::current_scene.get()->update();
         scene_manager::current_scene.get()->render();
+        main_window()->end_frame();
     }
     
     sound_engine::uninit();

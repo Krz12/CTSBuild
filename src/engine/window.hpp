@@ -10,6 +10,10 @@
 #include <glm/gtc/type_ptr.hpp>
 using namespace std;
 
+static void frame_buffer_size_callback(GLFWwindow* window, int width, int height) {
+    glViewport(0, 0, width, height);
+}
+
 class window {
     private:
     GLFWwindow* __api_window;
@@ -22,7 +26,7 @@ class window {
             throw runtime_error("Failed to initialize GLFW");
         }
         
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // lub 4, jeśli używasz OpenGL 4.x
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         __api_window = glfwCreateWindow(size.x, size.y, title.c_str(), NULL, NULL);
@@ -39,12 +43,8 @@ class window {
             glfwTerminate();
             throw runtime_error("Failed to initialize GLAD");
         }
-        //Ustaw projekjce {0,0} - lewy górny
-        glm::mat4 projection = glm::ortho(
-            0.0f, (float)size.x,
-            (float)size.y, 0.0f,   // odwrócone Y
-            -1.0f, 1.0f
-        );
+        glfwSetFramebufferSizeCallback(__api_window, frame_buffer_size_callback);
+        glViewport(0, 0, size.x, size.y);
     }
 
     ~window() {
@@ -112,12 +112,14 @@ class window {
         return glfwGetWindowTitle(__api_window);
     }
 
-    void update() {
+    void start_frame() {
         if (!is_open()) return;
         if (is_minimized()) return;
-        glfwPollEvents();
         glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glfwPollEvents();
+    }
+    void end_frame() {
         glfwSwapBuffers(__api_window);
     }
 };
