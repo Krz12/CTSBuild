@@ -25,7 +25,7 @@ int main() {
 
     //Po wczytaniu całego silnika wczytujemy menu
     scene_manager::init();
-
+    //test
     GLfloat vertecis[] = {
         -0.5f, -0.5f, (float)sqrt(3) / 3, 0.0f,
         0.5f, -0.5f, (float)sqrt(3) / 3, 0.0f,
